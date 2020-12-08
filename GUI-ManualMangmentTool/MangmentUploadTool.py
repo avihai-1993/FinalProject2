@@ -83,7 +83,7 @@ def uplaodFunction(valuesDict,option,typeVid,logView):
 
             db = DBConnector()
             db.upload(pathToLocalFile ,title)
-            db.uploadDataToDoc("videos/",data)
+            db.uploadDataToDoc("videos",data)
 
             logView.set("Done \n")
         except Exception:

@@ -10,7 +10,7 @@ class DBConnector:
     bucket_name='physovid.appspot.com'
     #certificate = 'pythontest-672b7-firebase-adminsdk-yg99h-31b07b33ca.json'
     certificate=r"C:\Users\User\PycharmProjects\FinalProject\util\physovid-firebase-adminsdk-nufmg-b1bd2eb903.json"
-    TIME_OUT_DEF = 30000000
+    TIME_OUT_DEF = 300000
     def __init__(self):
         cred = credentials.Certificate(self.certificate)
         firebase_admin.initialize_app(cred, {'storageBucket': self.bucket_name})
