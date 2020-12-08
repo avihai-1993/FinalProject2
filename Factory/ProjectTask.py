@@ -1,7 +1,7 @@
 from util.Craweler import Craweler
 from util.YouTubeDownLoader import YouTubeDownLoader
 from util.DBconnector import DBConnector
-
+import uuid
 class Task:
     def __init__(self,searchWord , wordbank,outputDir):
         self.searchWord = searchWord
@@ -26,6 +26,10 @@ class Task:
          for key in self.keys:
              file_output_path, data = downloader.downloadViaPytube(key,self.output_dir,self.wordbank,self.searchWord)
              if file_output_path is not None and data is not None:
-                 DBcon.upload(file_output_path, key)
+                 DBcon.upload(name_of_file=file_output_path, name_to_Blob=key)
+                # blob1 = DBcon.storage.bucket(DBcon.bucket_name).blob(key)
+                 #blob1.metadata = {'firebaseStorageDownloadTokens': uuid.uuid4()}
+                 #blob1.patch()
+
                  DBcon.uploadDataToDoc("pathDB", data)
                 #DBcon.uploadDocToCollection("colllction","doc",data)
