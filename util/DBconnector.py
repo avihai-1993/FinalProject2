@@ -27,6 +27,7 @@ class DBConnector:
 
 
 
+
     def download(self,name_of_file_in_bucket,name_of_path_to):
         storage.bucket(self.bucket_name).blob(name_of_file_in_bucket).download_to_filename(name_of_path_to, timeout=DBConnector.TIME_OUT_DEF)
 
