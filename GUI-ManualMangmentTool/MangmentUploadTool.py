@@ -5,6 +5,7 @@ from util.YouTubeDownLoader import YouTubeDownLoader
 from moviepy.editor import VideoFileClip
 from datetime import date
 from pytube import *
+import uuid
 
 
 
@@ -53,7 +54,7 @@ def uplaodFunction(valuesDict,option,typeVid,logView):
             print(data)
             db = DBConnector()
             db.upload(pathToFile, youtubeKeyStream)
-            db.uploadDataToDoc("videos/", data)
+            db.uploadDataToDoc("videos/"+youtubeKeyStream, data)
             logView.set("Done \n")
         except Exception:
             logView.set(Exception.__str__())
@@ -82,8 +83,8 @@ def uplaodFunction(valuesDict,option,typeVid,logView):
             print(data)
 
             db = DBConnector()
-            db.upload(pathToLocalFile ,title)
-            db.uploadDataToDoc("videos",data)
+            db.upload(pathToLocalFile,title)
+            #db.uploadDataToDoc("videos/"+str(uuid.uuid4()),data)
 
             logView.set("Done \n")
         except Exception:

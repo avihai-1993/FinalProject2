@@ -39,7 +39,7 @@ class YouTubeDownLoader:
            return None ,None
 
     def genrate_Media_url(self, blobName):
-        return "https://firebasestorage.googleapis.com/v0/b/webtest-2ec14.appspot.com/o/"+blobName+".mp4?alt=media"
+        return "https://firebasestorage.googleapis.com/v0/b/physovid.appspot.com/o/"+blobName+".mp4?alt=media"
 
 
 
