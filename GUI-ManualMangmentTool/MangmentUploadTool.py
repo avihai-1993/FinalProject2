@@ -154,6 +154,7 @@ def uplaodFunction(valuesDict,option,typeVid,logView):
     valuesDict["YTKS"].set("")
 
 
+
 #------------------------GUI INIT
 values_type_list = getTypeVideosList()
 keywords_info = getTypesKewords()
