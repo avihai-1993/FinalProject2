@@ -1,12 +1,10 @@
 import tkinter as tk
 from tkinter import IntVar,StringVar,ttk ,filedialog
 from util.DBconnector import DBConnector
-from util.YouTubeDownLoader import YouTubeDownLoader
 from moviepy.editor import VideoFileClip
 from datetime import date
 from pytube import *
 import threading
-from concurrent.futures import ThreadPoolExecutor
 import uuid
 import time
 
@@ -17,18 +15,50 @@ ON_YTSK_VALUE = 2
 OFF_YTSK_VALUE = 0
 
 
+def makeCustomFormatString(arr):
+    s = str()
+    for word in arr:
+        s = s + word + ","
+
+    s = s[:len(s) - 1]
+    return s
+
+def getTypesKewords():
+    db = DBConnector()
+    settings = db.readCollaction("settings")
+    res = dict()
+    for k in settings:
+        res[k] = makeCustomFormatString(settings[k]['keywords'])
+
+    return res
+
 
 
 def getTypeVideosList():
     db = DBConnector()
-    arr_settings = db.readDoc("settings/settings")['settings']
-    res_type_list = set()
+    return list(db.readCollaction("settings").keys())
 
-    for setting in arr_settings:
-        res_type_list.add(setting['type'])
+def commitSettingButtonFunction(typeToAddOrChange, moreKeywords , currentTypeList,typeComboBox1,typeComboBox2):
+    db = DBConnector()
 
-    return list(res_type_list)
+    if typeToAddOrChange is None or typeToAddOrChange=='':
+        return
 
+    if typeToAddOrChange in currentTypeList:
+        dataToUpdate = {
+            "keywords":moreKeywords
+        }
+        db.upDateDataToDoc("settings/"+typeToAddOrChange, dataToUpdate)
+    else:
+        data = {
+                "keywords": moreKeywords,
+                "lastTaskUrl": ""
+
+        }
+        db.uploadDocToCollection("settings",typeToAddOrChange,data)
+
+    typeComboBox1["values"] = getTypeVideosList()
+    typeComboBox2["values"] = getTypeVideosList()
 
 
 #_------------- oparete
@@ -124,9 +154,9 @@ def uplaodFunction(valuesDict,option,typeVid,logView):
     valuesDict["YTKS"].set("")
 
 
-
 #------------------------GUI INIT
 values_type_list = getTypeVideosList()
+keywords_info = getTypesKewords()
 
 mainWindow = tk.Tk()
 
@@ -142,52 +172,66 @@ path = StringVar()
 pathLable = tk.Label(mainWindow  ,text = "Local Path to video  : ")
 pathEntry = tk.Entry(mainWindow,width = 50,textvariable= path)
 
-
 option = IntVar()
 withPathCB =tk.Checkbutton(mainWindow, text="via Local Path" ,variable = option ,onvalue =ON_PATH_VALUE, offvalue = OFF_PATH_VALUE,)
 withYTKSCB =tk.Checkbutton(mainWindow, text="via YouTube key Stream" ,variable = option ,onvalue = ON_YTSK_VALUE, offvalue = OFF_YTSK_VALUE)
 
-
 typevar = StringVar()
 selectTypeOfVideoLable = tk.Label(mainWindow, text ="select the type of video : ")
 typeOfVideoCB = ttk.Combobox(mainWindow, textvariable=typevar ,state="readonly" , values = values_type_list)
-typevar.set(getTypeVideosList()[0])
+typevar.set(values_type_list[0])
 
 log = StringVar()
 logger = tk.Label(mainWindow,textvariable= log)
 
 
 #---------------------Editing setting add types of videos and keyWords for the batch craweler task
-
+key_words_for_entry = StringVar()
 edit_typevar = StringVar()
+
 editTypeLabel = tk.Label(mainWindow, text ="select the type to edit / add to settings : ")
+
 edit_typeOfVideo_CB = ttk.Combobox(mainWindow, textvariable=edit_typevar , values = values_type_list)
 
-key_words_for_entry = StringVar()
+handler = lambda event : key_words_for_entry.set(getTypesKewords()[event.widget.get()])
+
+edit_typeOfVideo_CB.bind(sequence="<<ComboboxSelected>>",func=handler)
+
+edit_typevar.set(values_type_list[0])
+
+
 edit_key_words_Label = tk.Label(mainWindow, text ="put keywords for new type format is word1,word2,...,wordN")
 edit_key_words_Entry = tk.Entry(mainWindow,width = 90,textvariable= key_words_for_entry)
-key_words_for_entry.set("ugu,uihuih")
+
+key_words_for_entry.set(keywords_info[edit_typevar.get()])
+
+
 
 entryDict = {"title" : title , "path" : path , "YTKS" : ytks}
 
 f = lambda : uplaodFunction(entryDict,option,typevar,log)
 
-
-def commitSettingButtonFunction(typeToaddOrChange, moreKeywords):
-    print(typeToaddOrChange)
-    print(moreKeywords)
+f1 = lambda : commitSettingButtonFunction(edit_typevar.get(),key_words_for_entry.get().split(','),getTypeVideosList(),typeOfVideoCB,edit_typeOfVideo_CB)
 
 
+def delTypeInSettings(typeToDelete,typeComboBox1,typeComboBox2):
+    l = getTypeVideosList()
+    if typeToDelete in l:
+        db = DBConnector()
+        db.deleteDoc("settings/"+typeToDelete)
 
-f1 = lambda : commitSettingButtonFunction(edit_typevar.get(),key_words_for_entry.get().split(','))
+    typeComboBox1["values"] = getTypeVideosList()
+    typeComboBox2["values"] = getTypeVideosList()
+
+f2 = lambda : delTypeInSettings(edit_typevar.get(),typeOfVideoCB,edit_typeOfVideo_CB)
 
 def getFilePath():
   path.set(str(tk.filedialog.askopenfilename()))
 
 uploadButton = tk.Button(mainWindow,text= "upload",command=f)
 BrowesButton = tk.Button(mainWindow,text= "Browes to local file",command=getFilePath)
-
-commitSettingButton = tk.Button(mainWindow,text= "commit to batch job setting ",command=f1)
+commitSettingButton = tk.Button(mainWindow,text= "commit to batch job setting",command=f1)
+deleteTypeInSettingsButton = tk.Button(mainWindow,text= "delete selected type",command=f2)
 
 in_side_spaceingX = 6
 in_side_spaceingY = 6
@@ -220,4 +264,5 @@ edit_typeOfVideo_CB.grid(row = 7 ,column = 1,ipadx= in_side_spaceingX ,ipady = i
 edit_key_words_Label.grid(row = 8 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 edit_key_words_Entry.grid(row = 9 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 commitSettingButton.grid(row = 9 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+deleteTypeInSettingsButton.grid(row = 10 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 mainWindow.mainloop()

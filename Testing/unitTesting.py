@@ -59,13 +59,23 @@ for blob in blobs:
 {'firebaseStorageDownloadTokens': '778ad74f-0010-411d-b667-3f2ef561e2b0'}
 '''
 
-arr_settings = db.readDoc("settings/settings")['settings']
-res_type_list = set()
+#db.upDateDataToDoc("settings/UpperBack",{'lastTaskUrl': 'good'})
 
 
-for setting in arr_settings:
-    res_type_list.add(setting['type'])
+def makeCustomFormatString(arr):
+    s = str()
+    for word in arr :
+        s = s+word+","
+
+    s = s[:len(s)-1]
+    return s
+
+settings = db.readCollaction("settings")
+#print(settings)
+res = dict()
+for k  in settings:
+    res[k] = makeCustomFormatString(settings[k]['keywords'])
 
 
-print(list(res_type_list))
+print(res)
 

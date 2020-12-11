@@ -47,6 +47,10 @@ class DBConnector:
         return self.db.document(DocumentPath).get().to_dict()
 
 
+
+    def deleteDoc(self,pathToDoc):
+        self.db.document(pathToDoc).delete()
+
     def readCollaction(self,CollactionPath):
         users_ref = self.db.collection(CollactionPath)
         docs = users_ref.stream()
