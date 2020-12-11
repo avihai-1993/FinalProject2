@@ -1,5 +1,6 @@
 from datetime import date
 from util.DBconnector import DBConnector
+import json
 
 import firebase_admin
 
@@ -26,7 +27,7 @@ d4 = today.strftime("%b-%d-%Y")
 print("d4 =", d4)
 '''
 
-#db = DBConnector()
+db = DBConnector()
 #db.upload(r"C:\Users\User\Desktop\youtube\Beginners Back Exercises that Strengthen your Back-TGI5TFnY8Ck.mp4","llll")
 #db.uploadDocToCollection("videos",doc="test1",data={"test": 1})
 #db.uploadDataToDoc("videos/"+str(uuid.uuid4()),{"test": 1})
@@ -58,4 +59,13 @@ for blob in blobs:
 {'firebaseStorageDownloadTokens': '778ad74f-0010-411d-b667-3f2ef561e2b0'}
 '''
 
-print(date.today())
+arr_settings = db.readDoc("settings/settings")['settings']
+res_type_list = set()
+
+
+for setting in arr_settings:
+    res_type_list.add(setting['type'])
+
+
+print(list(res_type_list))
+

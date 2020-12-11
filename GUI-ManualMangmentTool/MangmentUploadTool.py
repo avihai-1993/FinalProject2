@@ -11,36 +11,25 @@ import uuid
 import time
 
 
-
 ON_PATH_VALUE = 1
 OFF_PATH_VALUE = 0
 ON_YTSK_VALUE = 2
 OFF_YTSK_VALUE = 0
 
 
-'''
-   v = VideoFileClip(pathToLocalFile)
-            data = {"title": title,
-                    "length": v.duration/60,
-                    "publishDate": date.today().strftime("%Y-%m-%d 00:00"),
-                    "views": 0,
-                    "rating": None,
-                    "nameInStorage": title,
-                    "type": videoType,
-                    }
 
-            print(data)
-
-            db = DBConnector()
-
-            db.upload(pathToLocalFile,title)
-
-            db.uploadDataToDoc("videos/"+str(uuid.uuid4()),data)
-
-'''
 
 def getTypeVideosList():
-    return  ["neck" , "lower back" , "upper back" , "knee"]
+    db = DBConnector()
+    arr_settings = db.readDoc("settings/settings")['settings']
+    res_type_list = set()
+
+    for setting in arr_settings:
+        res_type_list.add(setting['type'])
+
+    return list(res_type_list)
+
+
 
 #_------------- oparete
 # {"title" : title , "path" : path , "YTKS" : ytks}
@@ -137,6 +126,7 @@ def uplaodFunction(valuesDict,option,typeVid,logView):
 
 
 #------------------------GUI INIT
+values_type_list = getTypeVideosList()
 
 mainWindow = tk.Tk()
 
@@ -160,22 +150,44 @@ withYTKSCB =tk.Checkbutton(mainWindow, text="via YouTube key Stream" ,variable =
 
 typevar = StringVar()
 selectTypeOfVideoLable = tk.Label(mainWindow, text ="select the type of video : ")
-typeOfVideoCB = ttk.Combobox(mainWindow, textvariable=typevar ,state="readonly" , values= getTypeVideosList())
+typeOfVideoCB = ttk.Combobox(mainWindow, textvariable=typevar ,state="readonly" , values = values_type_list)
 typevar.set(getTypeVideosList()[0])
 
 log = StringVar()
 logger = tk.Label(mainWindow,textvariable= log)
 
 
+#---------------------Editing setting add types of videos and keyWords for the batch craweler task
+
+edit_typevar = StringVar()
+editTypeLabel = tk.Label(mainWindow, text ="select the type to edit / add to settings : ")
+edit_typeOfVideo_CB = ttk.Combobox(mainWindow, textvariable=edit_typevar , values = values_type_list)
+
+key_words_for_entry = StringVar()
+edit_key_words_Label = tk.Label(mainWindow, text ="put keywords for new type format is word1,word2,...,wordN")
+edit_key_words_Entry = tk.Entry(mainWindow,width = 90,textvariable= key_words_for_entry)
+key_words_for_entry.set("ugu,uihuih")
+
 entryDict = {"title" : title , "path" : path , "YTKS" : ytks}
 
 f = lambda : uplaodFunction(entryDict,option,typevar,log)
+
+
+def commitSettingButtonFunction(typeToaddOrChange, moreKeywords):
+    print(typeToaddOrChange)
+    print(moreKeywords)
+
+
+
+f1 = lambda : commitSettingButtonFunction(edit_typevar.get(),key_words_for_entry.get().split(','))
 
 def getFilePath():
   path.set(str(tk.filedialog.askopenfilename()))
 
 uploadButton = tk.Button(mainWindow,text= "upload",command=f)
 BrowesButton = tk.Button(mainWindow,text= "Browes to local file",command=getFilePath)
+
+commitSettingButton = tk.Button(mainWindow,text= "commit to batch job setting ",command=f1)
 
 in_side_spaceingX = 6
 in_side_spaceingY = 6
@@ -202,5 +214,10 @@ BrowesButton.grid(row = 5 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_
 
 logger.grid(row = 6 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
+editTypeLabel.grid(row = 7 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+edit_typeOfVideo_CB.grid(row = 7 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
+edit_key_words_Label.grid(row = 8 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+edit_key_words_Entry.grid(row = 9 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+commitSettingButton.grid(row = 9 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 mainWindow.mainloop()
