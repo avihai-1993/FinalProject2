@@ -5,7 +5,10 @@ from util.YouTubeDownLoader import YouTubeDownLoader
 from moviepy.editor import VideoFileClip
 from datetime import date
 from pytube import *
+import threading
+from concurrent.futures import ThreadPoolExecutor
 import uuid
+import time
 
 
 
@@ -14,11 +17,76 @@ OFF_PATH_VALUE = 0
 ON_YTSK_VALUE = 2
 OFF_YTSK_VALUE = 0
 
+
+'''
+   v = VideoFileClip(pathToLocalFile)
+            data = {"title": title,
+                    "length": v.duration/60,
+                    "publishDate": date.today().strftime("%Y-%m-%d 00:00"),
+                    "views": 0,
+                    "rating": None,
+                    "nameInStorage": title,
+                    "type": videoType,
+                    }
+
+            print(data)
+
+            db = DBConnector()
+
+            db.upload(pathToLocalFile,title)
+
+            db.uploadDataToDoc("videos/"+str(uuid.uuid4()),data)
+
+'''
+
 def getTypeVideosList():
     return  ["neck" , "lower back" , "upper back" , "knee"]
 
-
+#_------------- oparete
 # {"title" : title , "path" : path , "YTKS" : ytks}
+
+def upload_via_key_strem(youtubeKeyStream,videotype,logView):
+    start = time.perf_counter()
+    url = "https://www.youtube.com/watch?v=" + youtubeKeyStream
+    youTubeVideoRef = YouTube(url)
+    data = {
+            "title": youTubeVideoRef.title,
+            "length": youTubeVideoRef.length / 60,
+            "publishDate": youTubeVideoRef.publish_date,
+            "views": 0,
+            "rating": None,
+            "nameInStorage": youtubeKeyStream,
+            "type": videotype,
+            }
+    saveDir = r"C:\Users\User\Desktop\PhsoVid"
+    pathToFile = youTubeVideoRef.streams.first().download(output_path=saveDir, filename=youtubeKeyStream)
+    print(data)
+    db = DBConnector()
+    db.upload(pathToFile, youtubeKeyStream)
+    db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
+    end = time.perf_counter()
+    logView.set(f"{youtubeKeyStream} has being uploaded ... Done in {round(end - start)} seconds \n")
+
+def upload_via_local_file(pathToLocalFile,name,videoType,logView):
+    start = time.perf_counter()
+    v = VideoFileClip(pathToLocalFile)
+    data = {"title": name,
+            "length": v.duration / 60,
+            "publishDate": date.today().strftime("%Y-%m-%d 00:00"),
+            "views": 0,
+            "rating": None,
+            "nameInStorage": name,
+            "type": videoType,
+            }
+
+    print(data)
+    db = DBConnector()
+    db.upload(pathToLocalFile, name)
+    db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
+    end = time.perf_counter()
+
+    logView.set(f"{name} has being uploaded ... Done in {round(end - start)} seconds \n")
+
 def uplaodFunction(valuesDict,option,typeVid,logView):
 
     title = valuesDict["title"].get()
@@ -26,70 +94,40 @@ def uplaodFunction(valuesDict,option,typeVid,logView):
     youtubeKeyStream = valuesDict["YTKS"].get()
     optionValue = option.get()
     videoType = typeVid.get()
-    print(title, pathToLocalFile ,youtubeKeyStream,optionValue,videoType)
 
-    if optionValue == OFF_PATH_VALUE and optionValue == OFF_YTSK_VALUE :
+    print(title, pathToLocalFile,youtubeKeyStream,optionValue,videoType)
+
+
+    if optionValue == OFF_PATH_VALUE and optionValue == OFF_YTSK_VALUE:
         logView.set("No upload method has being selected")
+        return
 
     elif optionValue == ON_YTSK_VALUE:
-        logView.set("uploading via Youtube key stream method \n")
+
+        if youtubeKeyStream is None or youtubeKeyStream == "":
+            logView.set("You must give a stream key to video that exist in youtube")
+            return
+
         try:
-            '''
-            TODO
-            uplading via streak key
-            '''
-            url = "https://www.youtube.com/watch?v="+youtubeKeyStream
-            youTubeVideoRef = YouTube(url)
-            data = {"title": youTubeVideoRef.title,
-                    "length": youTubeVideoRef.length / 60,
-                    "publishDate": youTubeVideoRef.publish_date,
-                    "views": 0,
-                    "rating": None,
-                    "nameInStorage": youtubeKeyStream,
-                    "type": type,
-                    "url": YouTubeDownLoader("").genrate_Media_url(youtubeKeyStream)
-                    }
-            saveDir = r"C:\Users\User\Desktop\PhsoVid"
-            pathToFile = youTubeVideoRef.streams.first().download(output_path=saveDir, filename=youtubeKeyStream)
-            print(data)
-            db = DBConnector()
-            db.upload(pathToFile, youtubeKeyStream)
-            db.uploadDataToDoc("videos/"+youtubeKeyStream, data)
-            logView.set("Done \n")
+            t_task = threading.Thread(target=upload_via_key_strem, args=[youtubeKeyStream,videoType, logView])
+            t_task.start()
+            logView.set("uploading.... \n")
         except Exception:
-            logView.set(Exception.__str__())
-
-
+            logView.set("somethig wrong happend")
 
     elif optionValue == ON_PATH_VALUE:
-        logView.set("uploading via local file ")
+        if title is None or title == "":
+            logView.set("You must give a title to video ")
+            return
+        if pathToLocalFile is None or pathToLocalFile == "":
+            logView.set("You must give a valid path to local video file")
+            return
         try:
-            '''
-            TODO
-            upladind via path
-            '''
-
-            v = VideoFileClip(pathToLocalFile)
-            #db.upload(pathToLocalFile ,title)
-            data = {"title": title,
-                    "length": v.duration/60 ,
-                    "publishDate": date.today().strftime("%Y-%m-%d 00:00"),
-                    "views": 0,
-                    "rating": None,
-                    "nameInStorage":title,
-                    "type": videoType,
-                    "url": YouTubeDownLoader("").genrate_Media_url(title)
-                    }
-            print(data)
-
-            db = DBConnector()
-            db.upload(pathToLocalFile,title)
-            #db.uploadDataToDoc("videos/"+str(uuid.uuid4()),data)
-
-            logView.set("Done \n")
+            t_task = threading.Thread(target=upload_via_local_file,args=[pathToLocalFile,title,videoType,logView])
+            t_task.start()
+            logView.set("uploading.... \n")
         except Exception:
-            logView.set(Exception.__str__())
-
+            logView.set("somethig wrong happend")
 
 
     valuesDict["title"].set("")
@@ -98,7 +136,7 @@ def uplaodFunction(valuesDict,option,typeVid,logView):
 
 
 
-
+#------------------------GUI INIT
 
 mainWindow = tk.Tk()
 
@@ -122,8 +160,8 @@ withYTKSCB =tk.Checkbutton(mainWindow, text="via YouTube key Stream" ,variable =
 
 typevar = StringVar()
 selectTypeOfVideoLable = tk.Label(mainWindow, text ="select the type of video : ")
-typeOfVideoCB = ttk.Combobox(mainWindow, textvariable=typevar)
-typeOfVideoCB['values'] = getTypeVideosList()
+typeOfVideoCB = ttk.Combobox(mainWindow, textvariable=typevar ,state="readonly" , values= getTypeVideosList())
+typevar.set(getTypeVideosList()[0])
 
 log = StringVar()
 logger = tk.Label(mainWindow,textvariable= log)

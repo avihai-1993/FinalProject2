@@ -21,9 +21,9 @@ class DBConnector:
 
 
     def upload(self,name_of_file,name_to_Blob):
-       blob = storage.bucket(self.bucket_name).blob(blob_name=name_to_Blob)
-
+       blob = storage.bucket(self.bucket_name).blob(blob_name=name_to_Blob,chunk_size=262144*4)
        blob.upload_from_filename(name_of_file, timeout=DBConnector.TIME_OUT_DEF)
+
 
 
 
@@ -40,7 +40,6 @@ class DBConnector:
 
 
     def uploadDataToDoc(self,toDocPath,data):
-
       self.db.document(toDocPath).set(data)
 
     def upDateDataToDoc(self, toDocPath, data):
