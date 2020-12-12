@@ -1,5 +1,6 @@
 from datetime import date
 from util.DBconnector import DBConnector
+from pprint import pprint
 import json
 
 import firebase_admin
@@ -81,8 +82,5 @@ print(res)
 
 '''
 
+pprint(db.readCollaction("settings"))
 
-
-p = "C/user/p.mp4"
-
-print(p[len(p) - 4 : len(p)] != ".mp4")

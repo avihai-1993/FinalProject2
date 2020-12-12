@@ -175,6 +175,7 @@ values_type_list = getTypeVideosList()
 keywords_info = getTypesKewords()
 
 mainWindow = tk.Tk()
+mainWindow.title("Manual Management Tool - MMT")
 
 title = StringVar()
 titleLable = tk.Label(mainWindow, text ="Title : ")
