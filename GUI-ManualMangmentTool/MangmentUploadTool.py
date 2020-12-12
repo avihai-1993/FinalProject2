@@ -198,7 +198,8 @@ typeOfVideoCB = ttk.Combobox(mainWindow, textvariable=typevar ,state="readonly" 
 typevar.set(values_type_list[0])
 
 log = StringVar()
-logger = tk.Label(mainWindow,textvariable= log)
+logger = tk.Label(mainWindow,textvariable= log ,fg = "purple" )
+log.set("log messages here")
 
 
 #---------------------Editing setting add types of videos and keyWords for the batch craweler task
