@@ -66,9 +66,10 @@ def commitSettingButtonFunction(typeToAddOrChange, moreKeywords , currentTypeLis
 
 def upload_via_key_strem(youtubeKeyStream,videotype,logView):
     start = time.perf_counter()
-    url = "https://www.youtube.com/watch?v=" + youtubeKeyStream
-    youTubeVideoRef = YouTube(url)
-    data = {
+    try:
+        url = "https://www.youtube.com/watch?v=" + youtubeKeyStream
+        youTubeVideoRef = YouTube(url)
+        data = {
             "title": youTubeVideoRef.title,
             "length": youTubeVideoRef.length / 60,
             "publishDate": youTubeVideoRef.publish_date,
@@ -76,34 +77,43 @@ def upload_via_key_strem(youtubeKeyStream,videotype,logView):
             "rating": None,
             "nameInStorage": youtubeKeyStream,
             "type": videotype,
-            }
-    saveDir = r"C:\Users\User\Desktop\PhsoVid"
-    pathToFile = youTubeVideoRef.streams.first().download(output_path=saveDir, filename=youtubeKeyStream)
-    print(data)
-    db = DBConnector()
-    db.upload(pathToFile, youtubeKeyStream)
-    db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
+        }
+        saveDir = r"C:\Users\User\Desktop\PhsoVid"
+        pathToFile = youTubeVideoRef.streams.first().download(output_path=saveDir, filename=youtubeKeyStream)
+        print(data)
+        db = DBConnector()
+        db.upload(pathToFile, youtubeKeyStream)
+        db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
+    except Exception:
+        logView.set("somethig wrong happend")
+        return
+
     end = time.perf_counter()
     logView.set(f"{youtubeKeyStream} has being uploaded ... Done in {round(end - start)} seconds \n")
 
 def upload_via_local_file(pathToLocalFile,name,videoType,logView):
     start = time.perf_counter()
-    v = VideoFileClip(pathToLocalFile)
-    data = {"title": name,
-            "length": v.duration / 60,
-            "publishDate": date.today().strftime("%Y-%m-%d 00:00"),
-            "views": 0,
-            "rating": None,
-            "nameInStorage": name,
-            "type": videoType,
-            }
+    try:
+        v = VideoFileClip(pathToLocalFile)
+        data = {"title": name,
+                "length": v.duration / 60,
+                "publishDate": date.today().strftime("%Y-%m-%d 00:00"),
+                "views": 0,
+                "rating": None,
+                "nameInStorage": name,
+                "type": videoType,
+                }
 
-    print(data)
-    db = DBConnector()
-    db.upload(pathToLocalFile, name)
-    db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
+        print(data)
+        db = DBConnector()
+        db.upload(pathToLocalFile, name)
+        db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
+
+    except Exception:
+        logView.set("somethig wrong happend")
+        return
+
     end = time.perf_counter()
-
     logView.set(f"{name} has being uploaded ... Done in {round(end - start)} seconds \n")
 
 def uplaodFunction(valuesDict,option,typeVid,logView):
@@ -138,8 +148,13 @@ def uplaodFunction(valuesDict,option,typeVid,logView):
         if title is None or title == "":
             logView.set("You must give a title to video ")
             return
-        if pathToLocalFile is None or pathToLocalFile == "":
-            logView.set("You must give a valid path to local video file")
+
+        if pathToLocalFile is None or pathToLocalFile == "" :
+            logView.set("You must give a valid path to local video file in mp4 format")
+            return
+
+        if pathToLocalFile[len(pathToLocalFile) - 4 : len(pathToLocalFile)] != ".mp4":
+            logView.set("You must give a valid path to local video file in mp4 format")
             return
         try:
             t_task = threading.Thread(target=upload_via_local_file,args=[pathToLocalFile,title,videoType,logView])
@@ -206,8 +221,6 @@ edit_key_words_Entry = tk.Entry(mainWindow,width = 90,textvariable= key_words_fo
 
 key_words_for_entry.set(keywords_info[edit_typevar.get()])
 
-
-
 entryDict = {"title" : title , "path" : path , "YTKS" : ytks}
 
 f = lambda : uplaodFunction(entryDict,option,typevar,log)
@@ -223,6 +236,7 @@ def delTypeInSettings(typeToDelete,typeComboBox1,typeComboBox2):
 
     typeComboBox1["values"] = getTypeVideosList()
     typeComboBox2["values"] = getTypeVideosList()
+
 
 f2 = lambda : delTypeInSettings(edit_typevar.get(),typeOfVideoCB,edit_typeOfVideo_CB)
 

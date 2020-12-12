@@ -57,7 +57,6 @@ for blob in blobs:
 {'firebaseStorageDownloadTokens': '87972122-aed8-4cbd-b54c-dc4ab3ecfa5f'}
 {'downloadURLs': "['cb4a2cf5-b687-4ccb-8e0e-4f39a0bc2d2f']", 'firebaseStorageDownloadTokens': 'a0ebbbf4-0cdd-402f-97b8-d42557997be1'}
 {'firebaseStorageDownloadTokens': '778ad74f-0010-411d-b667-3f2ef561e2b0'}
-'''
 
 #db.upDateDataToDoc("settings/UpperBack",{'lastTaskUrl': 'good'})
 
@@ -79,3 +78,11 @@ for k  in settings:
 
 print(res)
 
+
+'''
+
+
+
+p = "C/user/p.mp4"
+
+print(p[len(p) - 4 : len(p)] != ".mp4")
