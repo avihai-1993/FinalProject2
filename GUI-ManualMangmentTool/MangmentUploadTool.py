@@ -282,4 +282,6 @@ edit_key_words_Label.grid(row = 8 ,column = 0,ipadx= in_side_spaceingX ,ipady = 
 edit_key_words_Entry.grid(row = 9 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 commitSettingButton.grid(row = 9 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 deleteTypeInSettingsButton.grid(row = 10 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+
+
 mainWindow.mainloop()
