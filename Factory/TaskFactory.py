@@ -2,14 +2,14 @@ from Factory.ProjectTask import Task
 
 
 class TaskFactory:
-   def __init__(self,outputDir,settings):
-      self.outputdir = outputDir
+   def __init__(self,settings):
       self.settings = settings
 
-   def create_task(self,search_word,bank_of_words):
-       return Task(search_word,bank_of_words,self.outputdir)
+   def create_task(self,search_word,type_classifer):
+       return Task(search_word,type_classifer)
 
 
    def startWork(self):
        for setting in self.settings:
-           pass
+           for kw in setting["keywords"]:
+             self.create_task(kw,setting).start(5,setting["lastTaskUrl"])

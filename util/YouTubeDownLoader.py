@@ -1,6 +1,6 @@
 import os
 from pytube import *
-from util.descriptionAnalysis import Analyst
+#from util.descriptionAnalysis import Analyst
 
 class YouTubeDownLoader:
 
@@ -17,14 +17,14 @@ class YouTubeDownLoader:
         return self.pathToSaveVideos+"/"+key+".mp4"
 
 
-
-    def downloadViaPytube(self,key,pathToSaveVideos,keywordsBank,type):
+'''
+   def downloadViaPytube(self,key,pathToSaveVideos,keywordsBank,type):
        url = self.normalYTWatchUrl+key
        blobName = key
        youTubeVideoRef = YouTube(url)
-       analyst = Analyst(keywordsBank)
+       #analyst = Analyst(keywordsBank)
        score=analyst.calculateScore(youTubeVideoRef.keywords,youTubeVideoRef.title)
-       if score >= 75:
+       #if score >= 75:
            data = {"title": youTubeVideoRef.title,
                    "length": youTubeVideoRef.length / 60,
                    "publishDate": youTubeVideoRef.publish_date,
@@ -38,7 +38,10 @@ class YouTubeDownLoader:
        else:
            return None ,None
 
-    def genrate_Media_url(self, blobName):
+'''
+
+
+def genrate_Media_url(self, blobName):
         return "https://firebasestorage.googleapis.com/v0/b/physovid.appspot.com/o/"+blobName+".mp4?alt=media"
 
 

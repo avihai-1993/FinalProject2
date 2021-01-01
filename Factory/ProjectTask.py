@@ -1,35 +1,47 @@
 from util.Craweler import Craweler
-from util.YouTubeDownLoader import YouTubeDownLoader
+from pytube import *
 from util.DBconnector import DBConnector
 import uuid
 class Task:
-    def __init__(self,searchWord , wordbank,outputDir):
+    def __init__(self,searchWord , type):
         self.searchWord = searchWord
-        self.wordbank = wordbank
+        self.type = type
         self.keys = set()
         self.urls = set()
-        self.output_dir = outputDir
-
 
     def start(self,depth,startURL=None):
-         downloader = YouTubeDownLoader(self.output_dir)
          c = Craweler()
-         DBcon = DBConnector()
          if startURL == None:
-          starturl = c.getOnlyYTFromGoogleVids(self.searchWord)
-          c.findkeysCrawel(starturl, depth, self.keys)
-
+              starturl = c.getOnlyYTFromGoogleVids(self.searchWord)
+              c.findkeysCrawel(starturl, depth, self.keys)
          else:
             c.findkeysCrawel(startURL, depth, self.keys)
 
 
-         for key in self.keys:
-             file_output_path, data = downloader.downloadViaPytube(key,self.output_dir,self.wordbank,self.searchWord)
-             if file_output_path is not None and data is not None:
-                 DBcon.upload(name_of_file=file_output_path, name_to_Blob=key)
-                # blob1 = DBcon.storage.bucket(DBcon.bucket_name).blob(key)
-                 #blob1.metadata = {'firebaseStorageDownloadTokens': uuid.uuid4()}
-                 #blob1.patch()
+        #TODO save the last url
+         #c.lastSearchUrlFromCrawelingOpartion
 
-                 DBcon.uploadDataToDoc("pathDB", data)
-                #DBcon.uploadDocToCollection("colllction","doc",data)
+         print(self.keys)
+         for key in self.keys:
+             self.upload_via_key_strem(key,self.type)
+
+    def upload_via_key_strem(self,youtubeKeyStream, videotype):
+        try:
+            url = "https://www.youtube.com/watch?v=" + youtubeKeyStream
+            youTubeVideoRef = YouTube(url)
+            data = {
+                "title": youTubeVideoRef.title,
+                "length": youTubeVideoRef.length / 60,
+                "publishDate": youTubeVideoRef.publish_date,
+                "views": 0,
+                "rating": None,
+                "YTSK": youtubeKeyStream,
+                "type": videotype,
+            }
+            print(data)
+            db = DBConnector()
+            db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
+        except Exception as e:
+            print(e.__str__())
+            return
+

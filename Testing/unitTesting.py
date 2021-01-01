@@ -33,6 +33,15 @@ db = DBConnector()
 #db.uploadDocToCollection("videos",doc="test1",data={"test": 1})
 #db.uploadDataToDoc("videos/"+str(uuid.uuid4()),{"test": 1})
 '''
+def importBankfromFile(file_name):
+    bank = []
+    file = open(file_name,'r')
+    numOfLines = int(file.readline())
+    for i in range(numOfLines):
+        bank.append(file.readline().replace("\n", ""))
+    return Analyst(bank)
+
+
 bloblist = []
 blobs = storage.bucket(db.bucket_name).list_blobs()
 for blob in blobs:
@@ -82,5 +91,11 @@ print(res)
 
 '''
 
-pprint(db.readCollaction("settings"))
+t = db.readCollaction("settings")
+
+pprint(type(t))
+pprint(t)
+
+for i in t :
+    pprint(i)
 

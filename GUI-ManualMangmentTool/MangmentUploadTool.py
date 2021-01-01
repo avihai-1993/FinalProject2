@@ -1,8 +1,6 @@
 import tkinter as tk
-from tkinter import IntVar,StringVar,ttk ,filedialog
+from tkinter import StringVar,ttk
 from util.DBconnector import DBConnector
-from moviepy.editor import VideoFileClip
-from datetime import date
 from pytube import *
 import threading
 import uuid
@@ -14,7 +12,7 @@ OFF_PATH_VALUE = 0
 ON_YTSK_VALUE = 2
 OFF_YTSK_VALUE = 0
 
-
+#no C
 def makeCustomFormatString(arr):
     s = str()
     for word in arr:
@@ -32,8 +30,6 @@ def getTypesKewords():
 
     return res
 
-
-
 def getTypeVideosList():
     db = DBConnector()
     return list(db.readCollaction("settings").keys())
@@ -43,6 +39,8 @@ def commitSettingButtonFunction(typeToAddOrChange, moreKeywords , currentTypeLis
 
     if typeToAddOrChange is None or typeToAddOrChange=='':
         return
+
+    #TODO validete key words here
 
     if typeToAddOrChange in currentTypeList:
         dataToUpdate = {
@@ -59,13 +57,29 @@ def commitSettingButtonFunction(typeToAddOrChange, moreKeywords , currentTypeLis
 
     typeComboBox1["values"] = getTypeVideosList()
     typeComboBox2["values"] = getTypeVideosList()
-
+#no C
 
 #_------------- oparete
-# {"title" : title , "path" : path , "YTKS" : ytks}
+
+def get_YTV_key_words(ytks,ytks_strVar,logView):
+    start = time.perf_counter()
+    try:
+        print(ytks,ytks_strVar)
+        url = "https://www.youtube.com/watch?v=" + ytks
+        youTubeVideoRef = YouTube(url)
+        ytks_strVar.set(youTubeVideoRef.keywords.__str__())
+        end = time.perf_counter()
+        logView.set(f"getiing video key words {round(end - start)} seconds \n")
+    except Exception as e:
+        logView.set("somethig wrong happend  " + e.__str__())
+        return
+    pass
+
 
 def upload_via_key_strem(youtubeKeyStream,videotype,logView):
+
     start = time.perf_counter()
+    #TODO chack if already in db
     try:
         url = "https://www.youtube.com/watch?v=" + youtubeKeyStream
         youTubeVideoRef = YouTube(url)
@@ -75,98 +89,34 @@ def upload_via_key_strem(youtubeKeyStream,videotype,logView):
             "publishDate": youTubeVideoRef.publish_date,
             "views": 0,
             "rating": None,
-            "nameInStorage": youtubeKeyStream,
+            "YTSK": youtubeKeyStream,
             "type": videotype,
         }
-        saveDir = r"C:\Users\User\Desktop\PhsoVid"
-        pathToFile = youTubeVideoRef.streams.first().download(output_path=saveDir, filename=youtubeKeyStream)
+
         print(data)
         db = DBConnector()
-        db.upload(pathToFile, youtubeKeyStream)
         db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
-    except Exception:
-        logView.set("somethig wrong happend")
+    except Exception as e:
+        logView.set("somethig wrong happend  "+ e.__str__() )
         return
 
     end = time.perf_counter()
     logView.set(f"{youtubeKeyStream} has being uploaded ... Done in {round(end - start)} seconds \n")
 
-def upload_via_local_file(pathToLocalFile,name,videoType,logView):
-    start = time.perf_counter()
+
+def uplaodFunction(youtubeKeyStream,typeVid,logView):
+    if youtubeKeyStream is None or youtubeKeyStream.get() == "":
+        logView.set("You must give a stream key to video that exist in youtube")
+        return
     try:
-        v = VideoFileClip(pathToLocalFile)
-        data = {"title": name,
-                "length": v.duration / 60,
-                "publishDate": date.today().strftime("%Y-%m-%d 00:00"),
-                "views": 0,
-                "rating": None,
-                "nameInStorage": name,
-                "type": videoType,
-                }
+        t_task = threading.Thread(target=upload_via_key_strem, args=[youtubeKeyStream.get(),typeVid, logView])
+        t_task.start()
+        logView.set("uploading.... \n")
 
-        print(data)
-        db = DBConnector()
-        db.upload(pathToLocalFile, name)
-        db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
+    except Exception as e :
+        logView.set("somethig wrong happend  " + e.__str__())
 
-    except Exception:
-        logView.set("somethig wrong happend")
-        return
-
-    end = time.perf_counter()
-    logView.set(f"{name} has being uploaded ... Done in {round(end - start)} seconds \n")
-
-def uplaodFunction(valuesDict,option,typeVid,logView):
-
-    title = valuesDict["title"].get()
-    pathToLocalFile = valuesDict["path"].get()
-    youtubeKeyStream = valuesDict["YTKS"].get()
-    optionValue = option.get()
-    videoType = typeVid.get()
-
-    print(title, pathToLocalFile,youtubeKeyStream,optionValue,videoType)
-
-
-    if optionValue == OFF_PATH_VALUE and optionValue == OFF_YTSK_VALUE:
-        logView.set("No upload method has being selected")
-        return
-
-    elif optionValue == ON_YTSK_VALUE:
-
-        if youtubeKeyStream is None or youtubeKeyStream == "":
-            logView.set("You must give a stream key to video that exist in youtube")
-            return
-
-        try:
-            t_task = threading.Thread(target=upload_via_key_strem, args=[youtubeKeyStream,videoType, logView])
-            t_task.start()
-            logView.set("uploading.... \n")
-        except Exception:
-            logView.set("somethig wrong happend")
-
-    elif optionValue == ON_PATH_VALUE:
-        if title is None or title == "":
-            logView.set("You must give a title to video ")
-            return
-
-        if pathToLocalFile is None or pathToLocalFile == "" :
-            logView.set("You must give a valid path to local video file in mp4 format")
-            return
-
-        if pathToLocalFile[len(pathToLocalFile) - 4 : len(pathToLocalFile)] != ".mp4":
-            logView.set("You must give a valid path to local video file in mp4 format")
-            return
-        try:
-            t_task = threading.Thread(target=upload_via_local_file,args=[pathToLocalFile,title,videoType,logView])
-            t_task.start()
-            logView.set("uploading.... \n")
-        except Exception:
-            logView.set("somethig wrong happend")
-
-
-    valuesDict["title"].set("")
-    valuesDict["path"].set("")
-    valuesDict["YTKS"].set("")
+    youtubeKeyStream.set("")
 
 
 
@@ -177,30 +127,28 @@ keywords_info = getTypesKewords()
 mainWindow = tk.Tk()
 mainWindow.title("Manual Management Tool - MMT")
 
-title = StringVar()
-titleLable = tk.Label(mainWindow, text ="Title : ")
-titleEntry = tk.Entry(mainWindow,width = 50 ,textvariable= title)
+log = StringVar()
+logger = tk.Label(mainWindow,textvariable= log ,fg = "purple" )
+log.set("log messages here")
 
 ytks = StringVar()
 ytksLable = tk.Label(mainWindow, text ="YouTube Stream key : ")
 ytksEntry = tk.Entry(mainWindow,width = 50,textvariable= ytks)
 
-path = StringVar()
-pathLable = tk.Label(mainWindow  ,text = "Local Path to video  : ")
-pathEntry = tk.Entry(mainWindow,width = 50,textvariable= path)
 
-option = IntVar()
-withPathCB =tk.Checkbutton(mainWindow, text="via Local Path" ,variable = option ,onvalue =ON_PATH_VALUE, offvalue = OFF_PATH_VALUE,)
-withYTKSCB =tk.Checkbutton(mainWindow, text="via YouTube key Stream" ,variable = option ,onvalue = ON_YTSK_VALUE, offvalue = OFF_YTSK_VALUE)
-
+#need
 typevar = StringVar()
 selectTypeOfVideoLable = tk.Label(mainWindow, text ="select the type of video : ")
 typeOfVideoCB = ttk.Combobox(mainWindow, textvariable=typevar ,state="readonly" , values = values_type_list)
 typevar.set(values_type_list[0])
 
-log = StringVar()
-logger = tk.Label(mainWindow,textvariable= log ,fg = "purple" )
-log.set("log messages here")
+
+
+key_words_strVar = StringVar()
+get_YTVKW = lambda : get_YTV_key_words(ytks.get(),key_words_strVar,log)
+YTVideo_key_words_Entry = tk.Entry(mainWindow,width = 50 ,textvariable=key_words_strVar )
+get_YTVideo_key_wordsButton = tk.Button(mainWindow,text= "find video key words" , command=get_YTVKW)
+
 
 
 #---------------------Editing setting add types of videos and keyWords for the batch craweler task
@@ -208,13 +156,10 @@ key_words_for_entry = StringVar()
 edit_typevar = StringVar()
 
 editTypeLabel = tk.Label(mainWindow, text ="select the type to edit / add to settings : ")
-
 edit_typeOfVideo_CB = ttk.Combobox(mainWindow, textvariable=edit_typevar , values = values_type_list)
 
 handler = lambda event : key_words_for_entry.set(getTypesKewords()[event.widget.get()])
-
 edit_typeOfVideo_CB.bind(sequence="<<ComboboxSelected>>",func=handler)
-
 edit_typevar.set(values_type_list[0])
 
 
@@ -223,9 +168,8 @@ edit_key_words_Entry = tk.Entry(mainWindow,width = 90,textvariable= key_words_fo
 
 key_words_for_entry.set(keywords_info[edit_typevar.get()])
 
-entryDict = {"title" : title , "path" : path , "YTKS" : ytks}
 
-f = lambda : uplaodFunction(entryDict,option,typevar,log)
+f = lambda : uplaodFunction(ytks,typevar.get(),log)
 
 f1 = lambda : commitSettingButtonFunction(edit_typevar.get(),key_words_for_entry.get().split(','),getTypeVideosList(),typeOfVideoCB,edit_typeOfVideo_CB)
 
@@ -242,11 +186,8 @@ def delTypeInSettings(typeToDelete,typeComboBox1,typeComboBox2):
 
 f2 = lambda : delTypeInSettings(edit_typevar.get(),typeOfVideoCB,edit_typeOfVideo_CB)
 
-def getFilePath():
-  path.set(str(tk.filedialog.askopenfilename()))
-
 uploadButton = tk.Button(mainWindow,text= "upload",command=f)
-BrowesButton = tk.Button(mainWindow,text= "Browes to local file",command=getFilePath)
+
 commitSettingButton = tk.Button(mainWindow,text= "commit to batch job setting",command=f1)
 deleteTypeInSettingsButton = tk.Button(mainWindow,text= "delete selected type",command=f2)
 
@@ -255,33 +196,26 @@ in_side_spaceingY = 6
 out_side_spaceingX = 9
 out_side_spaceingY = 9
 
-titleLable.grid(row = 0, column = 0 ,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY ,padx = out_side_spaceingX ,pady = out_side_spaceingY)
-titleEntry.grid(row = 0, column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
+ytksLable.grid(row = 0, column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
+ytksEntry.grid(row = 0, column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
 
-pathLable.grid(row = 1, column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
-pathEntry.grid(row = 1, column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
+selectTypeOfVideoLable.grid(row =1,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
+typeOfVideoCB.grid(row = 1, column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
 
-ytksLable.grid(row = 2, column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
-ytksEntry.grid(row = 2, column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
+uploadButton.grid(row = 2 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
+logger.grid(row =2 ,column =1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
-withPathCB.grid(row = 3, column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
-withYTKSCB.grid(row = 3, column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
+YTVideo_key_words_Entry.grid(row = 3 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+get_YTVideo_key_wordsButton.grid(row = 3 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
-selectTypeOfVideoLable.grid(row =4,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
-typeOfVideoCB.grid(row = 4, column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
+editTypeLabel.grid(row = 4 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+edit_typeOfVideo_CB.grid(row = 4 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
-uploadButton.grid(row = 5 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
-BrowesButton.grid(row = 5 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
+edit_key_words_Label.grid(row = 5 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
-logger.grid(row = 6 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+edit_key_words_Entry.grid(row = 6 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+commitSettingButton.grid(row = 6 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
-editTypeLabel.grid(row = 7 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-edit_typeOfVideo_CB.grid(row = 7 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-
-edit_key_words_Label.grid(row = 8 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-edit_key_words_Entry.grid(row = 9 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-commitSettingButton.grid(row = 9 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-deleteTypeInSettingsButton.grid(row = 10 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-
+deleteTypeInSettingsButton.grid(row = 7 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
 mainWindow.mainloop()
