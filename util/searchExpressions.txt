@@ -1,4 +1,0 @@
-3
-cat
-dog
-sheep
