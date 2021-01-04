@@ -48,7 +48,7 @@ class Task:
             }
             print(data)
             db = DBConnector()
-            db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
+            db.uploadDataToDoc("videos/" + youtubeKeyStream, data)
         except Exception as e:
             print(e.__str__())
             return

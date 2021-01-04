@@ -112,7 +112,7 @@ def upload_via_key_strem(youtubeKeyStream,videotype,logView):
 
         print(data)
         db = DBConnector()
-        db.uploadDataToDoc("videos/" + str(uuid.uuid4()), data)
+        db.uploadDataToDoc("videos/" + youtubeKeyStream, data)
     except Exception as e:
         logView.set("somethig wrong happend  "+ e.__str__() )
         return
