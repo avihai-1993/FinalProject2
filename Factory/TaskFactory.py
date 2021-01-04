@@ -1,5 +1,5 @@
 from Factory.ProjectTask import Task
-
+from util.DBconnector import DBConnector
 
 class TaskFactory:
    def __init__(self,settings):
@@ -10,6 +10,7 @@ class TaskFactory:
 
 
    def startWork(self):
-       for setting in self.settings:
-           for kw in setting["keywords"]:
-             self.create_task(kw,setting).start(5,setting["lastTaskUrl"])
+       for setting_type in self.settings:
+           keywords = DBConnector().readCollaction("settings/" + setting_type + "/keywords")
+           for kw in keywords:
+               self.create_task(kw,setting_type).start(5,keywords[kw]['lastTaskUrl'])

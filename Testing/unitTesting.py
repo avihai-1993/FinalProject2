@@ -1,6 +1,6 @@
 from datetime import date
 from util.DBconnector import DBConnector
-from pprint import pprint
+from pprint import pprint as pp
 import json
 
 import firebase_admin
@@ -87,15 +87,51 @@ for k  in settings:
 
 
 print(res)
-
-
 '''
+settings = db.readCollaction("settings")
+pp(settings)
+for setting_type in settings:
+    pp(setting_type)
+    keywords = DBConnector().readCollaction("settings/"+setting_type+"/keywords")
+    pp(keywords)
+    for kw in keywords:
+        pp(keywords[kw]['lastTaskUrl'])
 
-t = db.readCollaction("settings")
 
-pprint(type(t))
-pprint(t)
+#pprint(type(settings))
+#pprint(settings)
 
-for i in t :
-    pprint(i)
+def makeCustomFormatString(arr):
+    s = str()
+    for word in arr:
+        s = s + word + ","
+
+    s = s[:len(s) - 1]
+    return s
+
+def getTypesKewords():
+    try:
+        settings =DBConnector().readCollaction("settings")
+        dict_key_word = {}
+        for type_in_settings in settings:
+            dict_key_word[type_in_settings] = []
+            keywords = DBConnector().readCollaction("settings/"+type_in_settings+"/keyWords")
+            for kw in keywords:
+                dict_key_word[type_in_settings].append(kw)
+
+            dict_key_word[type_in_settings] = makeCustomFormatString(dict_key_word[type_in_settings])
+
+
+        return dict_key_word
+
+    except Exception as e:
+        print(e.__str__())
+
+
+
+#pprint(getTypesKewords())
+
+
+#keywords = DBConnector().readCollaction("settings/Lumbar/keywords")
+#pprint(keywords)
 

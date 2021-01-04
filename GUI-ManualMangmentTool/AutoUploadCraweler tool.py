@@ -17,7 +17,8 @@ def clean_Op(log,*args):
 def runSearchAndUpload(log):
     log.set("start search and upload data")
     #TODO get setting
-    TaskFactory({}).startWork()
+    settings = DBConnector.readCollaction("settings")
+    TaskFactory(settings).startWork()
     pass
 
 

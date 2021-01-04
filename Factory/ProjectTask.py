@@ -11,19 +11,27 @@ class Task:
 
     def start(self,depth,startURL=None):
          c = Craweler()
-         if startURL == None:
+         if startURL == None or startURL == '':
               starturl = c.getOnlyYTFromGoogleVids(self.searchWord)
               c.findkeysCrawel(starturl, depth, self.keys)
          else:
-            c.findkeysCrawel(startURL, depth, self.keys)
+              c.findkeysCrawel(startURL, depth, self.keys)
+
+        #TODO key Sync
 
 
-        #TODO save the last url
-         #c.lastSearchUrlFromCrawelingOpartion
+        #TODO save the last url Done vvvv
 
-         print(self.keys)
+         save_dict_to_setting = {
+             'lastTaskUrl': c.lastSearchUrlFromCrawelingOpartion
+         }
+         DBConnector().uploadDataToDoc("settings/"+self.type+"/keywords/"+self.searchWord,save_dict_to_setting)
+
          for key in self.keys:
              self.upload_via_key_strem(key,self.type)
+
+
+
 
     def upload_via_key_strem(self,youtubeKeyStream, videotype):
         try:
@@ -31,7 +39,7 @@ class Task:
             youTubeVideoRef = YouTube(url)
             data = {
                 "title": youTubeVideoRef.title,
-                "length": youTubeVideoRef.length / 60,
+                "length": youTubeVideoRef.length / 60 ,
                 "publishDate": youTubeVideoRef.publish_date,
                 "views": 0,
                 "rating": None,

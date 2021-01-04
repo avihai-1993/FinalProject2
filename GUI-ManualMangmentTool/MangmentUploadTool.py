@@ -21,43 +21,59 @@ def makeCustomFormatString(arr):
     s = s[:len(s) - 1]
     return s
 
-def getTypesKewords():
-    db = DBConnector()
-    settings = db.readCollaction("settings")
-    res = dict()
-    for k in settings:
-        res[k] = makeCustomFormatString(settings[k]['keywords'])
 
-    return res
+def getTypesKewords():
+    try:
+        settings =DBConnector().readCollaction("settings")
+        dict_key_word = {}
+        for type_in_settings in settings:
+            dict_key_word[type_in_settings] = []
+            keywords = DBConnector().readCollaction("settings/"+type_in_settings+"/keywords")
+            for kw in keywords:
+                dict_key_word[type_in_settings].append(kw)
+
+            dict_key_word[type_in_settings] = makeCustomFormatString(dict_key_word[type_in_settings])
+
+
+        return dict_key_word
+
+    except Exception as e:
+        print(e.__str__())
 
 def getTypeVideosList():
     db = DBConnector()
     return list(db.readCollaction("settings").keys())
 
-def commitSettingButtonFunction(typeToAddOrChange, moreKeywords , currentTypeList,typeComboBox1,typeComboBox2):
-    db = DBConnector()
+#TODO handel errros
 
+def commitSettingButtonFunction(typeToAddOrChange, keywordListInEntry, typeComboBox1, typeComboBox2,logView):
+    db = DBConnector()
     if typeToAddOrChange is None or typeToAddOrChange=='':
         return
 
-    #TODO validete key words here
+    #TODO validete key words here and typeToAddOrChange
+    keywords_json_fb = DBConnector().readCollaction("settings/" + typeToAddOrChange + "/keywords")
+    keywords_fb  = keywords_json_fb.keys()
 
-    if typeToAddOrChange in currentTypeList:
-        dataToUpdate = {
-            "keywords":moreKeywords
-        }
-        db.upDateDataToDoc("settings/"+typeToAddOrChange, dataToUpdate)
-    else:
-        data = {
-                "keywords": moreKeywords,
-                "lastTaskUrl": ""
+    #adding new key word for the type
+    for kw in keywordListInEntry:
+        if kw not in keywords_fb:
+            print(kw)
+            data = {
+                'lastTaskUrl': ''
+            }
+            db.uploadDocToCollection("settings/" + typeToAddOrChange + "/keywords", kw, data)
 
-        }
-        db.uploadDocToCollection("settings",typeToAddOrChange,data)
+    #removing thing that are not in the entry fro fb
+    for kw in keywords_fb:
+        if kw not in keywordListInEntry:
+            db.deleteDoc("settings/" + typeToAddOrChange + "/keywords/" + kw)
+
 
     typeComboBox1["values"] = getTypeVideosList()
     typeComboBox2["values"] = getTypeVideosList()
-#no C
+    logView.set("changes commited")
+
 
 #_------------- oparete
 
@@ -73,8 +89,9 @@ def get_YTV_key_words(ytks,ytks_strVar,logView):
     except Exception as e:
         logView.set("somethig wrong happend  " + e.__str__())
         return
-    pass
 
+    end = time.perf_counter()
+    logView.set(f'find the key words from {ytks} in {round(end - start)} seconds \n')
 
 def upload_via_key_strem(youtubeKeyStream,videotype,logView):
 
@@ -101,8 +118,7 @@ def upload_via_key_strem(youtubeKeyStream,videotype,logView):
         return
 
     end = time.perf_counter()
-    logView.set(f"{youtubeKeyStream} has being uploaded ... Done in {round(end - start)} seconds \n")
-
+    logView.set(f'{youtubeKeyStream} has being uploaded ... Done in {round(end - start)} seconds \n')
 
 def uplaodFunction(youtubeKeyStream,typeVid,logView):
     if youtubeKeyStream is None or youtubeKeyStream.get() == "":
@@ -117,6 +133,11 @@ def uplaodFunction(youtubeKeyStream,typeVid,logView):
         logView.set("somethig wrong happend  " + e.__str__())
 
     youtubeKeyStream.set("")
+
+def keyWordsFinder(ytks,ytks_strVar,logView):
+    t_task = threading.Thread(target=get_YTV_key_words, args=[ytks,ytks_strVar, logView])
+    t_task.start()
+    logView.set("uploading.... \n")
 
 
 
@@ -145,7 +166,7 @@ typevar.set(values_type_list[0])
 
 
 key_words_strVar = StringVar()
-get_YTVKW = lambda : get_YTV_key_words(ytks.get(),key_words_strVar,log)
+get_YTVKW = lambda : keyWordsFinder(ytks.get(),key_words_strVar,log)
 YTVideo_key_words_Entry = tk.Entry(mainWindow,width = 50 ,textvariable=key_words_strVar )
 get_YTVideo_key_wordsButton = tk.Button(mainWindow,text= "find video key words" , command=get_YTVKW)
 
@@ -165,13 +186,12 @@ edit_typevar.set(values_type_list[0])
 
 edit_key_words_Label = tk.Label(mainWindow, text ="put keywords for new type format is word1,word2,...,wordN")
 edit_key_words_Entry = tk.Entry(mainWindow,width = 90,textvariable= key_words_for_entry)
-
 key_words_for_entry.set(keywords_info[edit_typevar.get()])
 
 
 f = lambda : uplaodFunction(ytks,typevar.get(),log)
 
-f1 = lambda : commitSettingButtonFunction(edit_typevar.get(),key_words_for_entry.get().split(','),getTypeVideosList(),typeOfVideoCB,edit_typeOfVideo_CB)
+f1 = lambda : commitSettingButtonFunction(edit_typevar.get(),key_words_for_entry.get().split(','),typeOfVideoCB,edit_typeOfVideo_CB,log)
 
 
 def delTypeInSettings(typeToDelete,typeComboBox1,typeComboBox2):

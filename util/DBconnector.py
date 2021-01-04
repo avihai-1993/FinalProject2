@@ -17,24 +17,21 @@ class DBConnector:
         self.db = firestore.client()
 
 
-
-
-
+#----storage not releven any more
     def upload(self,name_of_file,name_to_Blob):
        blob = storage.bucket(self.bucket_name).blob(blob_name=name_to_Blob,chunk_size=262144*4)
        blob.upload_from_filename(name_of_file, timeout=DBConnector.TIME_OUT_DEF)
 
-
     def download(self,name_of_file_in_bucket,name_of_path_to):
         storage.bucket(self.bucket_name).blob(name_of_file_in_bucket).download_to_filename(name_of_path_to, timeout=DBConnector.TIME_OUT_DEF)
 
+    def delete(self, name_of_file):
+        storage.bucket(self.bucket_name).delete_blob(name_of_file)
+
+#-----------------------fireStore
 
     def uploadDocToCollection(self,toCollection,doc,data):
       self.db.collection(toCollection).document(doc).set(data)
-
-    def delete(self,name_of_file):
-        storage.bucket(self.bucket_name).delete_blob(name_of_file)
-
 
     def uploadDataToDoc(self,toDocPath,data):
       self.db.document(toDocPath).set(data)
@@ -47,13 +44,14 @@ class DBConnector:
         return self.db.document(DocumentPath).get().to_dict()
 
 
-
     def deleteDoc(self,pathToDoc):
         self.db.document(pathToDoc).delete()
 
     def readCollaction(self,CollactionPath):
         users_ref = self.db.collection(CollactionPath)
+        #print(users_ref)
         docs = users_ref.stream()
+        #print(docs)
         res = dict()
 
         for doc in docs:

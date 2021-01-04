@@ -34,7 +34,14 @@ class Craweler:
         else:
             print("somthing wrong --- bad url")
 
+
+
     def findNextUrlForSearch(self, startUrl):
+        '''
+
+        :param startUrl:
+        :return: next url
+        '''
         r = requests.get(startUrl)
         if r.status_code == 200:
             bs = BeautifulSoup(r.content, 'html.parser')
