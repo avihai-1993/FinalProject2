@@ -1,7 +1,9 @@
 from Factory.ProjectTask import Task
 from util.DBconnector import DBConnector
+from threading import Thread
 
-class TaskFactory:
+
+class TaskFactory():
    def __init__(self,settings):
       self.settings = settings
 
@@ -13,4 +15,6 @@ class TaskFactory:
        for setting_type in self.settings:
            keywords = DBConnector().readCollaction("settings/" + setting_type + "/keywords")
            for kw in keywords:
-               self.create_task(kw,setting_type).start(5,keywords[kw]['lastTaskUrl'])
+               myTask = self.create_task(kw,setting_type)
+               t = Thread(target=myTask.start, args=[1,keywords[kw]['lastTaskUrl']])
+               t.start()

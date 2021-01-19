@@ -49,31 +49,40 @@ def getTypeVideosList():
 def commitSettingButtonFunction(typeToAddOrChange, keywordListInEntry, typeComboBox1, typeComboBox2,logView):
     db = DBConnector()
     if typeToAddOrChange is None or typeToAddOrChange=='':
+        logView.set("cant add or change type ")
         return
 
     #TODO validete key words here and typeToAddOrChange
-    keywords_json_fb = DBConnector().readCollaction("settings/" + typeToAddOrChange + "/keywords")
-    keywords_fb  = keywords_json_fb.keys()
+    if keywordListInEntry is None or len(keywordListInEntry) == 0 or keywordListInEntry[0] == '':
+        logView.set("cant add type with empty key word ")
+        return
 
-    #adding new key word for the type
-    for kw in keywordListInEntry:
-        if kw not in keywords_fb:
-            print(kw)
-            data = {
-                'lastTaskUrl': ''
-            }
-            db.uploadDocToCollection("settings/" + typeToAddOrChange + "/keywords", kw, data)
+    try:
+        task = threading.Thread(target=db.uploadDataToDoc, args=["settings/" + typeToAddOrChange, {"onlyForCreate": "a"}])
+        task.start()
+        task.join()
+        keywords_json_fb = db.readCollaction("settings/" + typeToAddOrChange + "/keywords")
+        keywords_fb  = keywords_json_fb.keys()
+        # adding new key word for the type
+        for kw in keywordListInEntry:
+            if kw not in keywords_fb:
+                data = {
+                    'lastTaskUrl': ''
+                }
+                db.uploadDocToCollection("settings/" + typeToAddOrChange + "/keywords", kw, data)
 
-    #removing thing that are not in the entry fro fb
-    for kw in keywords_fb:
-        if kw not in keywordListInEntry:
-            db.deleteDoc("settings/" + typeToAddOrChange + "/keywords/" + kw)
+        # removing thing that are not in the entry fro fb
+        for kw in keywords_fb:
+            if kw not in keywordListInEntry:
+                db.deleteDoc("settings/" + typeToAddOrChange + "/keywords/" + kw)
+
+        typeComboBox1["values"] = getTypeVideosList()
+        typeComboBox2["values"] = getTypeVideosList()
+        logView.set("changes commited")
 
 
-    typeComboBox1["values"] = getTypeVideosList()
-    typeComboBox2["values"] = getTypeVideosList()
-    logView.set("changes commited")
-
+    except Exception as e:
+        logView.set("something want wrong" , e.__str__())
 
 #_------------- oparete
 
@@ -186,7 +195,7 @@ edit_typevar.set(values_type_list[0])
 
 edit_key_words_Label = tk.Label(mainWindow, text ="put keywords for new type format is word1,word2,...,wordN")
 edit_key_words_Entry = tk.Entry(mainWindow,width = 90,textvariable= key_words_for_entry)
-key_words_for_entry.set(keywords_info[edit_typevar.get()])
+key_words_for_entry.set(getTypesKewords()[edit_typevar.get()])
 
 
 f = lambda : uplaodFunction(ytks,typevar.get(),log)

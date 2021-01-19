@@ -1,9 +1,11 @@
 from util.Craweler import Craweler
 from pytube import *
 from util.DBconnector import DBConnector
-import uuid
-class Task:
+
+
+class Task():
     def __init__(self,searchWord , type):
+
         self.searchWord = searchWord
         self.type = type
         self.keys = set()
@@ -16,11 +18,6 @@ class Task:
               c.findkeysCrawel(starturl, depth, self.keys)
          else:
               c.findkeysCrawel(startURL, depth, self.keys)
-
-        #TODO key Sync
-
-
-        #TODO save the last url Done vvvv
 
          save_dict_to_setting = {
              'lastTaskUrl': c.lastSearchUrlFromCrawelingOpartion

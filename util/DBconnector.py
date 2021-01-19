@@ -31,6 +31,7 @@ class DBConnector:
 #-----------------------fireStore
 
     def uploadDocToCollection(self,toCollection,doc,data):
+
       self.db.collection(toCollection).document(doc).set(data)
 
     def uploadDataToDoc(self,toDocPath,data):

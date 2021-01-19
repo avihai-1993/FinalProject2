@@ -2,6 +2,7 @@ from datetime import date
 from util.DBconnector import DBConnector
 from pprint import pprint as pp
 import json
+import threading
 
 import firebase_admin
 
@@ -90,6 +91,14 @@ print(res)
 '''
 settings = db.readCollaction("settings")
 pp(settings)
+task = threading.Thread(target=db.uploadDataToDoc ,args=["settings/ooo", {"a":"uguig"}])
+task.start()
+task.join()
+settings = db.readCollaction("settings")
+pp(settings)
+'''
+
+
 for setting_type in settings:
     pp(setting_type)
     keywords = DBConnector().readCollaction("settings/"+setting_type+"/keywords")
@@ -97,7 +106,7 @@ for setting_type in settings:
     for kw in keywords:
         pp(keywords[kw]['lastTaskUrl'])
 
-
+'''
 #pprint(type(settings))
 #pprint(settings)
 

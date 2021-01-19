@@ -1,14 +1,6 @@
 from util.DBconnector import DBConnector
 
-
-##TODO Main script will do
-##TODO  work crawler to find youtube stream keys //optinal Analysis here
-##TODO  downLoad video with steam key //or optinal Analysis here
-##TODO  upload videos with metadeta to firebase
-
-
-##TODO claen Script
-##TODO chack FB for wike videos and delete them
+from util.Craweler import Craweler
 
 def importFileTolist(file_name):
     res = []
@@ -39,14 +31,14 @@ def importFileTolist(file_name):
 #db.upload("wordBank.txt","test2")
 
 
-# inputSt = "cat"
-# t = set()
-# c = Craweler()
-# starturl = c.getOnlyYTFromGoogleVids(inputSt)
-# c.findkeysCrawel(starturl, 5, t)
-# #
-# for i in t:
-#      print(i)
+inputSt = "cat"
+t = set()
+c = Craweler()
+starturl = c.getOnlyYTFromGoogleVids(inputSt)
+c.findkeysCrawel(starturl, 5, t)
+#
+for i in t:
+      print(i)
 #
 #
 # print(c.lastSearchUrlFromCrawelingOpartion)
