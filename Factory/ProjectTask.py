@@ -1,4 +1,4 @@
-from util.Craweler import Craweler
+from util.Craweler import Crawler
 from pytube import *
 from util.DBconnector import DBConnector
 
@@ -9,18 +9,18 @@ class Task():
         self.searchWord = searchWord
         self.type = type
         self.keys = set()
-        self.urls = set()
+
 
     def start(self,depth,startURL=None):
-         c = Craweler()
+         c = Crawler()
          if startURL == None or startURL == '':
-              starturl = c.getOnlyYTFromGoogleVids(self.searchWord)
-              c.findkeysCrawel(starturl, depth, self.keys)
+              starturl = c.getGoogleVidYTUrl(self.searchWord)
+              c.crawel(starturl, depth, self.keys)
          else:
-              c.findkeysCrawel(startURL, depth, self.keys)
+              c.crawel(startURL, depth, self.keys)
 
          save_dict_to_setting = {
-             'lastTaskUrl': c.lastSearchUrlFromCrawelingOpartion
+             'lastTaskUrl': c.nexturl
          }
          DBConnector().uploadDataToDoc("settings/"+self.type+"/keywords/"+self.searchWord,save_dict_to_setting)
 

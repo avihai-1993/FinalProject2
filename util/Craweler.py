@@ -1,62 +1,40 @@
-import requests
-import re
+
 from bs4 import BeautifulSoup
-
-class Craweler:
-
-    lastSearchUrlFromCrawelingOpartion = ""
-    def getUrlForGoogleVid(self,inputStr):
-        return "https://www.google.com/search?q=" + inputStr + "&rlz=1C1CHZL_iwIL910IL911&sxsrf=ALeKk01dYowsHmlHmiiDcKBEv_cG_bzi1Q:1598479794858&source=lnms&tbm=vid&sa=X&ved=2ahUKEwiapumi8bnrAhVR2aQKHYGUBwIQ_AUoAnoECB4QBA&biw=1093&bih=526"
-
-    def getOnlyYTFromGoogleVids(self, inputStr):
-       return "https://www.google.com/search?q="+inputStr+"&rlz=1C1CHZL_iwIL910IL911&tbm=vid&sxsrf=ALeKk00UQkIFsUUkOIMKkCqFsYZF92i-Dg:1599225569738&source=lnt&tbs=srcf:H4sIAAAAAAAAANOuzC8tKU1K1UvOz1UrT03KTQGzkhNLivXyi9L1SrPV8hJLMvPzEnPSU_1PTixILMjKTYUrAdFpicmpSfn42mAMAetRY408AAAA&sa=X&ved=0ahUKEwi2zP-_y8_rAhWJ_qQKHalOCAIQpwUIIg&biw=1366&bih=657&dpr=1"
-
-    def searchYouTubeVideosKeysInGoogleVideos(self,url, keys):
-        r = requests.get(url)
-        if r.status_code == 200:
-            bs = BeautifulSoup(r.content, 'html.parser')
-            for l in bs.find_all('a'):
-                for s in re.findall("https://www.youtube.com/watch%3Fv%3D.*[&|%]", l.get("href")):
-                    keys.add(str(s).split("&", 1)[0].replace("https://www.youtube.com/watch%3Fv%3D", ""))
+import requests
 
 
-        else:
-            print("somthing wrong --- bad url")
+class Crawler:
 
-    def findNextUrlForSearch(self,startUrl, urls):
-        r = requests.get(startUrl)
-        if r.status_code == 200:
-            bs = BeautifulSoup(r.content, 'html.parser')
-            for i in bs.find_all('a'):
-                if str(i.get("href")).__contains__("search?q=") :
-                    urls.add("https://www.google.com" + i.get("href"))
+    def __init__(self):
+        self.nexturl = ""
 
-        else:
-            print("somthing wrong --- bad url")
+    def getGoogleVidYTUrl(self,inputStr):
+        return 'https://www.google.com/search?q=' + inputStr + '&tbm=vid&sxsrf=ALeKk03mqj8CnGxXPjzaB5JsHKU22Loj2A:1611354521040&source=lnt&tbs=srcf:H4sIAAAAAAAAANOuzC8tKU1K1UvOz1UrT03KTQGzSjJS00sTi1IyE_1PA_1LTE5NSk_1PxsMKcgtaQ4sSQjPzcVKpeXkp8LZgIAKrN1hE4AAAA&sa=X&ved=0ahUKEwjXpNWuy7DuAhWkQxUIHVUACmQQpwUIJg&biw=1707&bih=821&dpr=0.8'
+
+    def getStreamKeys(self,inputUrl,l):
+        try:
+            html = requests.get(inputUrl).text
+            page = BeautifulSoup(html, 'html.parser')
+            hebrewNext = "הדף הבא"
+            googleprifix =  "https://www.google.com"
+            prifix = "/url?q=https://www.youtube.com/watch%3Fv%3D"
+            for link in page.find_all('a'):
+                if prifix in link["href"]:
+                    if '%' in link["href"].split('&')[0].replace(prifix, ''):
+                        l.add(link["href"].split('&')[0].replace(prifix, '').split('%')[0])
+                    else:
+                        l.add(link["href"].split('&')[0].replace(prifix, ''))
+                elif hebrewNext in link.__str__():
+                    self.nexturl = googleprifix+link["href"]
+
+        except Exception as e:
+            print("somthing want Wrong : " +e.__str__())
 
 
 
-    def findNextUrlForSearch(self, startUrl):
-        '''
 
-        :param startUrl:
-        :return: next url
-        '''
-        r = requests.get(startUrl)
-        if r.status_code == 200:
-            bs = BeautifulSoup(r.content, 'html.parser')
-            for i in bs.find_all('a'):
-                if str(i.get("href")).__contains__("search?q=") and str(i.get("aria-label")) == "הדף הבא":
-                    return "https://www.google.com" + i.get("href")
-
-        else:
-            print("somthing wrong --- bad url")
-
-    def findkeysCrawel(self,url,depth,keys):
-        if depth == 0 :
+    def crawel(self, depth, url, keySet):
+        if depth == 0:
             return
-        else:
-            self.searchYouTubeVideosKeysInGoogleVideos(url,keys)
-            self.lastSearchUrlFromCrawelingOpartion = self.findNextUrlForSearch(url)
-            self.findkeysCrawel(self.lastSearchUrlFromCrawelingOpartion,depth - 1,keys)
-
+        self.getStreamKeys(url, keySet)
+        self.crawel(depth - 1, self.nexturl, keySet)
