@@ -4,6 +4,7 @@ from threading import Thread
 
 DEPTH = 3
 
+
 class TaskFactory:
    def __init__(self,settings):
       self.settings = settings
