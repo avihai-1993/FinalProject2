@@ -17,21 +17,23 @@ def clean_Op(log,*args):
 def runSearchAndUpload(log):
     log.set("start search and upload data")
     #TODO get setting
-    settings = DBConnector.readCollaction("settings")
+    settings = DBConnector().readCollaction("settings")
     TaskFactory(settings).startWork()
     pass
 
 
 def upLoapFromBackUp(log):
-    log.set("upload all from backup")
-    b = BackUp()
-    keys = b.getAllkeys()
-    for k in keys:
-        Thread(target=upload_via_key_strem, args=[k,None,False]).start()
+    try:
+        log.set("upload all from backup")
+        b = BackUp()
+        keys = b.getAllkeys()
+        for k in keys:
+            Thread(target=upload_via_key_strem, args=[k['key'], k['type'], False]).start()
+    except Exception as e:
+        log.set(e.__str__())
+        return
 
-
-
-    pass
+    log.set("all key as been diploaed")
 
 
 

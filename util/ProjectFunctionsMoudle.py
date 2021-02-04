@@ -16,7 +16,7 @@ def upload_via_key_strem(youtubeKeyStream,videotype , backup = True):
             "YTSK": youtubeKeyStream,
             "type": videotype,
         }
-        
+
         db = DBConnector()
         db.uploadDataToDoc("videos/" + youtubeKeyStream, data)
         if backup:
