@@ -2,10 +2,10 @@ import tkinter as tk
 from tkinter import StringVar,ttk
 from Factory.TaskFactory import TaskFactory
 from util.DBconnector import DBConnector
+from util.sqlite3BackUpYTStreamKey import SqlLiteKeyBackUp as BackUp
+from util.ProjectFunctionsMoudle import upload_via_key_strem
+from threading import Thread
 
-import threading
-import uuid
-import time
 
 
 
@@ -24,6 +24,13 @@ def runSearchAndUpload(log):
 
 def upLoapFromBackUp(log):
     log.set("upload all from backup")
+    b = BackUp()
+    keys = b.getAllkeys()
+    for k in keys:
+        Thread(target=upload_via_key_strem, args=[k,None,False]).start()
+
+
+
     pass
 
 

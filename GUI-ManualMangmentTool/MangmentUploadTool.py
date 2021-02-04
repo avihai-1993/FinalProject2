@@ -1,16 +1,11 @@
 import tkinter as tk
 from tkinter import StringVar,ttk
 from util.DBconnector import DBConnector
-from pytube import *
 import threading
-import uuid
 import time
+from util.ProjectFunctionsMoudle import upload_via_key_strem
 
 
-ON_PATH_VALUE = 1
-OFF_PATH_VALUE = 0
-ON_YTSK_VALUE = 2
-OFF_YTSK_VALUE = 0
 
 #no C
 def makeCustomFormatString(arr):
@@ -84,55 +79,14 @@ def commitSettingButtonFunction(typeToAddOrChange, keywordListInEntry, typeCombo
     except Exception as e:
         logView.set("something want wrong" , e.__str__())
 
-#_------------- oparete
 
-def get_YTV_key_words(ytks,ytks_strVar,logView):
-    start = time.perf_counter()
-    try:
-        print(ytks,ytks_strVar)
-        url = "https://www.youtube.com/watch?v=" + ytks
-        youTubeVideoRef = YouTube(url)
-        ytks_strVar.set(youTubeVideoRef.keywords.__str__())
-        end = time.perf_counter()
-        logView.set(f"getiing video key words {round(end - start)} seconds \n")
-    except Exception as e:
-        logView.set("somethig wrong happend  " + e.__str__())
-        return
-
-    end = time.perf_counter()
-    logView.set(f'find the key words from {ytks} in {round(end - start)} seconds \n')
-
-def upload_via_key_strem(youtubeKeyStream,videotype,logView):
-
-    start = time.perf_counter()
-    #TODO chack if already in db
-    try:
-        url = "https://www.youtube.com/watch?v=" + youtubeKeyStream
-        youTubeVideoRef = YouTube(url)
-        data = {
-            "title": youTubeVideoRef.title,
-            "length": youTubeVideoRef.length / 60,
-            "publishDate": youTubeVideoRef.publish_date,
-            "views": 0,
-            "rating": None,
-            "YTSK": youtubeKeyStream,
-            "type": videotype,
-        }
-
-        print(data)
-        db = DBConnector()
-        db.uploadDataToDoc("videos/" + youtubeKeyStream, data)
-    except Exception as e:
-        logView.set("somethig wrong happend  "+ e.__str__() )
-        return
-
-    end = time.perf_counter()
-    logView.set(f'{youtubeKeyStream} has being uploaded ... Done in {round(end - start)} seconds \n')
 
 def uplaodFunction(youtubeKeyStream,typeVid,logView):
     if youtubeKeyStream is None or youtubeKeyStream.get() == "":
         logView.set("You must give a stream key to video that exist in youtube")
         return
+
+    start = time.perf_counter()
     try:
         t_task = threading.Thread(target=upload_via_key_strem, args=[youtubeKeyStream.get(),typeVid, logView])
         t_task.start()
@@ -142,11 +96,8 @@ def uplaodFunction(youtubeKeyStream,typeVid,logView):
         logView.set("somethig wrong happend  " + e.__str__())
 
     youtubeKeyStream.set("")
-
-def keyWordsFinder(ytks,ytks_strVar,logView):
-    t_task = threading.Thread(target=get_YTV_key_words, args=[ytks,ytks_strVar, logView])
-    t_task.start()
-    logView.set("uploading.... \n")
+    end = time.perf_counter()
+    logView.set(f'{youtubeKeyStream} has being uploaded ... Done in {round(end - start)} seconds \n')
 
 
 
@@ -171,13 +122,6 @@ typevar = StringVar()
 selectTypeOfVideoLable = tk.Label(mainWindow, text ="select the type of video : ")
 typeOfVideoCB = ttk.Combobox(mainWindow, textvariable=typevar ,state="readonly" , values = values_type_list)
 typevar.set(values_type_list[0])
-
-
-
-key_words_strVar = StringVar()
-get_YTVKW = lambda : keyWordsFinder(ytks.get(),key_words_strVar,log)
-YTVideo_key_words_Entry = tk.Entry(mainWindow,width = 50 ,textvariable=key_words_strVar )
-get_YTVideo_key_wordsButton = tk.Button(mainWindow,text= "find video key words" , command=get_YTVKW)
 
 
 
@@ -234,17 +178,14 @@ typeOfVideoCB.grid(row = 1, column = 1,ipadx= in_side_spaceingX ,ipady = in_side
 uploadButton.grid(row = 2 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx = out_side_spaceingX ,pady = out_side_spaceingY)
 logger.grid(row =2 ,column =1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
-YTVideo_key_words_Entry.grid(row = 3 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-get_YTVideo_key_wordsButton.grid(row = 3 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+editTypeLabel.grid(row = 3 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+edit_typeOfVideo_CB.grid(row = 3 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
-editTypeLabel.grid(row = 4 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-edit_typeOfVideo_CB.grid(row = 4 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+edit_key_words_Label.grid(row = 4 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
-edit_key_words_Label.grid(row = 5 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+edit_key_words_Entry.grid(row = 5 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+commitSettingButton.grid(row = 5 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
-edit_key_words_Entry.grid(row = 6 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-commitSettingButton.grid(row = 6 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-
-deleteTypeInSettingsButton.grid(row = 7 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
+deleteTypeInSettingsButton.grid(row = 6 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
 mainWindow.mainloop()
