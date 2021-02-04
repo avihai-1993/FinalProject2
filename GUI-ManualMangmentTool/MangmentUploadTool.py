@@ -6,8 +6,6 @@ import time
 from util.ProjectFunctionsMoudle import upload_via_key_strem
 
 
-
-#no C
 def makeCustomFormatString(arr):
     s = str()
     for word in arr:
@@ -19,7 +17,7 @@ def makeCustomFormatString(arr):
 
 def getTypesKewords():
     try:
-        settings =DBConnector().readCollaction("settings")
+        settings = DBConnector().readCollaction("settings")
         dict_key_word = {}
         for type_in_settings in settings:
             dict_key_word[type_in_settings] = []
@@ -34,6 +32,7 @@ def getTypesKewords():
 
     except Exception as e:
         print(e.__str__())
+
 
 def getTypeVideosList():
     db = DBConnector()
@@ -78,7 +77,6 @@ def commitSettingButtonFunction(typeToAddOrChange, keywordListInEntry, typeCombo
 
     except Exception as e:
         logView.set("something want wrong" , e.__str__())
-
 
 
 def uplaodFunction(youtubeKeyStream,typeVid,logView):

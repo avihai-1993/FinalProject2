@@ -21,7 +21,7 @@ def upload_via_key_strem(youtubeKeyStream,videotype , backup = True):
         db.uploadDataToDoc("videos/" + youtubeKeyStream, data)
         if backup:
             dbBack = BackUp()
-            dbBack.addKey(youtubeKeyStream)
+            dbBack.addKey(youtubeKeyStream,videotype)
 
     except Exception as e:
         raise e

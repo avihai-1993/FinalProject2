@@ -89,13 +89,7 @@ for k  in settings:
 
 print(res)
 '''
-settings = db.readCollaction("settings")
-pp(settings)
-task = threading.Thread(target=db.uploadDataToDoc ,args=["settings/ooo", {"a":"uguig"}])
-task.start()
-task.join()
-settings = db.readCollaction("settings")
-pp(settings)
+print(db.readCollaction("videos"))
 '''
 
 
