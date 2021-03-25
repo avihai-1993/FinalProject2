@@ -1,6 +1,6 @@
 from util.DBconnector import DBConnector
 
-from util.Craweler import Craweler
+from util.Craweler import Crawler
 
 def importFileTolist(file_name):
     res = []
@@ -33,9 +33,9 @@ def importFileTolist(file_name):
 
 inputSt = "cat"
 t = set()
-c = Craweler()
-starturl = c.getOnlyYTFromGoogleVids(inputSt)
-c.findkeysCrawel(starturl, 5, t)
+c = Crawler()
+starturl = c.getGoogleVidYTUrl(inputSt)
+c.crawel(5,starturl,t)
 #
 for i in t:
       print(i)
