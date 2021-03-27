@@ -13,7 +13,14 @@ class Crawler:
 
     def getStreamKeys(self,inputUrl,l):
         try:
-            html = requests.get(inputUrl).text
+
+            r = requests.get(inputUrl)
+
+            if r.status_code != 200:
+                print("somthing want Wrong : " + e.__str__())
+                return
+
+            html = r.text
             page = BeautifulSoup(html, 'html.parser')
             hebrewNext = "הדף הבא"
             googleprifix =  "https://www.google.com"

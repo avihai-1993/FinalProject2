@@ -84,18 +84,19 @@ def uplaodFunction(youtubeKeyStream,typeVid,logView):
         logView.set("You must give a stream key to video that exist in youtube")
         return
 
-    start = time.perf_counter()
+
     try:
-        t_task = threading.Thread(target=upload_via_key_strem, args=[youtubeKeyStream.get(),typeVid, logView])
+
+        t_task = threading.Thread(target=upload_via_key_strem, args=[youtubeKeyStream.get(),typeVid])
         t_task.start()
-        logView.set("uploading.... \n")
+        logView.set("video sent to database ")
+
+
 
     except Exception as e :
         logView.set("somethig wrong happend  " + e.__str__())
 
     youtubeKeyStream.set("")
-    end = time.perf_counter()
-    logView.set(f'{youtubeKeyStream} has being uploaded ... Done in {round(end - start)} seconds \n')
 
 
 
@@ -105,6 +106,7 @@ keywords_info = getTypesKewords()
 
 mainWindow = tk.Tk()
 mainWindow.title("Manual Management Tool - MMT")
+
 
 log = StringVar()
 logger = tk.Label(mainWindow,textvariable= log ,fg = "purple" )
