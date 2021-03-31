@@ -2,8 +2,8 @@ import tkinter as tk
 from tkinter import StringVar,ttk
 from util.DBconnector import DBConnector
 import threading
-import time
 from util.ProjectFunctionsMoudle import upload_via_key_strem
+from util.ProjectFunctionsMoudle import strOnlydigAndAlpha
 
 
 def makeCustomFormatString(arr):
@@ -35,10 +35,15 @@ def getTypesKewords():
 
 
 def getTypeVideosList():
-    db = DBConnector()
-    return list(db.readCollaction("settings").keys())
+    try:
+        db = DBConnector()
+        return list(db.readCollaction("settings").keys())
+    except:
+        return []
 
-#TODO handel errros
+
+
+
 
 def commitSettingButtonFunction(typeToAddOrChange, keywordListInEntry, typeComboBox1, typeComboBox2,logView):
     db = DBConnector()
@@ -46,10 +51,19 @@ def commitSettingButtonFunction(typeToAddOrChange, keywordListInEntry, typeCombo
         logView.set("cant add or change type ")
         return
 
-    #TODO validete key words here and typeToAddOrChange
-    if keywordListInEntry is None or len(keywordListInEntry) == 0 or keywordListInEntry[0] == '':
-        logView.set("cant add type with empty key word ")
+    if not strOnlydigAndAlpha(typeToAddOrChange):
+        logView.set("type can only contains chars and numbers ")
         return
+
+
+    if keywordListInEntry is None or len(keywordListInEntry) == 0 or keywordListInEntry[0] == '':
+        logView.set("cant add type with empty key words ")
+        return
+
+    for w in keywordListInEntry:
+        if not strOnlydigAndAlpha(w):
+            logView.set("key words only contains chars and numbers ")
+            return
 
     try:
         task = threading.Thread(target=db.uploadDataToDoc, args=["settings/" + typeToAddOrChange, {"onlyForCreate": "a"}])
