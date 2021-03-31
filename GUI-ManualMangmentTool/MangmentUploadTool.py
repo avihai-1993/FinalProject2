@@ -79,7 +79,7 @@ def commitSettingButtonFunction(typeToAddOrChange, keywordListInEntry, typeCombo
         logView.set("something want wrong" , e.__str__())
 
 
-def uplaodFunction(youtubeKeyStream,typeVid,logView):
+def uplaodFunction(youtubeKeyStream,typeVid,logView,mw):
     if youtubeKeyStream is None or youtubeKeyStream.get() == "":
         logView.set("You must give a stream key to video that exist in youtube")
         return
@@ -89,7 +89,10 @@ def uplaodFunction(youtubeKeyStream,typeVid,logView):
 
         t_task = threading.Thread(target=upload_via_key_strem, args=[youtubeKeyStream.get(),typeVid])
         t_task.start()
-        logView.set("video sent to database ")
+        logView.set("video sent to database wait for it to upload")
+        mw.update()
+        t_task.join(100000)
+        logView.set("video uploaded")
 
 
 
@@ -106,6 +109,7 @@ keywords_info = getTypesKewords()
 
 mainWindow = tk.Tk()
 mainWindow.title("Manual Management Tool - MMT")
+
 
 
 log = StringVar()
@@ -142,7 +146,7 @@ edit_key_words_Entry = tk.Entry(mainWindow,width = 90,textvariable= key_words_fo
 key_words_for_entry.set(getTypesKewords()[edit_typevar.get()])
 
 
-f = lambda : uplaodFunction(ytks,typevar.get(),log)
+f = lambda : uplaodFunction(ytks,typevar.get(),log,mainWindow)
 
 f1 = lambda : commitSettingButtonFunction(edit_typevar.get(),key_words_for_entry.get().split(','),typeOfVideoCB,edit_typeOfVideo_CB,log)
 
