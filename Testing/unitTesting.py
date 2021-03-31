@@ -132,9 +132,4 @@ def getTypesKewords():
 
 
 
-#pprint(getTypesKewords())
-
-
-#keywords = DBConnector().readCollaction("settings/Lumbar/keywords")
-#pprint(keywords)
 
