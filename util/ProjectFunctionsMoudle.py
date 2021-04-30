@@ -11,7 +11,7 @@ def strOnlydigAndAlpha(s):
 
     return True
 
-def upload_via_key_strem(youtubeKeyStream,videotype , backup = True):
+def upload_via_key_strem(youtubeKeyStream,videotype,backup = True,listener = None):
     try:
         url = "https://www.youtube.com/watch?v=" + youtubeKeyStream
         youTubeVideoRef = YouTube(url)
@@ -24,12 +24,15 @@ def upload_via_key_strem(youtubeKeyStream,videotype , backup = True):
             "YTSK": youtubeKeyStream,
             "type": videotype,
         }
-
         db = DBConnector()
         db.uploadDataToDoc("videos/" + youtubeKeyStream, data)
         if backup:
             dbBack = BackUp()
             dbBack.addKey(youtubeKeyStream,videotype)
-
+        if listener is not None:
+           listener(youtubeKeyStream+ " video up loaded")
     except Exception as e:
+        if listener is not None:
+           listener(e)
+           return
         raise e

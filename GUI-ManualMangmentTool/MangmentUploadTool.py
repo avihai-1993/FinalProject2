@@ -4,6 +4,8 @@ from util.DBconnector import DBConnector
 import threading
 from util.ProjectFunctionsMoudle import upload_via_key_strem
 from util.ProjectFunctionsMoudle import strOnlydigAndAlpha
+import sys
+import os
 
 
 def makeCustomFormatString(arr):
@@ -93,7 +95,7 @@ def commitSettingButtonFunction(typeToAddOrChange, keywordListInEntry, typeCombo
         logView.set("something want wrong" , e.__str__())
 
 
-def uplaodFunction(youtubeKeyStream,typeVid,logView,mw):
+def uplaodFunction(youtubeKeyStream,typeVid,logView,mw,err):
     if youtubeKeyStream is None or youtubeKeyStream.get() == "":
         logView.set("You must give a stream key to video that exist in youtube")
         return
@@ -101,12 +103,11 @@ def uplaodFunction(youtubeKeyStream,typeVid,logView,mw):
 
     try:
 
-        t_task = threading.Thread(target=upload_via_key_strem, args=[youtubeKeyStream.get(),typeVid])
+        t_task = threading.Thread(target=upload_via_key_strem, args=[youtubeKeyStream.get(),typeVid,True,err])
         t_task.start()
         logView.set("video sent to database wait for it to upload")
         mw.update()
-        t_task.join(100000)
-        logView.set("video uploaded")
+
 
 
 
@@ -129,6 +130,9 @@ mainWindow.title("Manual Management Tool - MMT")
 log = StringVar()
 logger = tk.Label(mainWindow,textvariable= log ,fg = "purple" )
 log.set("log messages here")
+
+def errhandler(e):
+    log.set(e.__str__())
 
 ytks = StringVar()
 ytksLable = tk.Label(mainWindow, text ="YouTube Stream key : ")
@@ -160,7 +164,7 @@ edit_key_words_Entry = tk.Entry(mainWindow,width = 90,textvariable= key_words_fo
 key_words_for_entry.set(getTypesKewords()[edit_typevar.get()])
 
 
-f = lambda : uplaodFunction(ytks,typevar.get(),log,mainWindow)
+f = lambda : uplaodFunction(ytks,typevar.get(),log,mainWindow,errhandler)
 
 f1 = lambda : commitSettingButtonFunction(edit_typevar.get(),key_words_for_entry.get().split(','),typeOfVideoCB,edit_typeOfVideo_CB,log)
 

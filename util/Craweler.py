@@ -17,7 +17,7 @@ class Crawler:
             r = requests.get(inputUrl)
 
             if r.status_code != 200:
-                print("somthing want Wrong : " + e.__str__())
+                print("somthing want Wrong : " )
                 return
 
             html = r.text
