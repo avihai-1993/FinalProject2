@@ -20,7 +20,7 @@ def upload_via_key_strem(youtubeKeyStream,videotype,backup = True,listener = Non
             "length": youTubeVideoRef.length / 60,
             "publishDate": youTubeVideoRef.publish_date,
             "ratedNum": 0,
-            "avgRating": None,
+            "avgRating": 0,
             "YTSK": youtubeKeyStream,
             "type": videotype,
         }

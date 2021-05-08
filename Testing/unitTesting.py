@@ -89,7 +89,17 @@ for k  in settings:
 
 print(res)
 '''
-print(db.readCollaction("videos"))
+
+#patch
+'''
+vid = db.readCollaction("videos")
+for v in vid:
+    db.upDateDataToDoc("videos/"+v,{"avgRating":0})
+'''
+
+
+
+
 '''
 
 
@@ -129,7 +139,6 @@ def getTypesKewords():
 
     except Exception as e:
         print(e.__str__())
-
 
 
 
