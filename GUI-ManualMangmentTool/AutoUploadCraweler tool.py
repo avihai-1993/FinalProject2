@@ -9,8 +9,8 @@ from threading import Thread
 
 def ivaluaetFanction(rating,views,*args):
     print(args[0],args[1])
-
-    return rating <= args[1] and views >= args[0]
+    print(rating,views)
+    return rating >= args[1] and views <= args[0]
 
 
 def clean_Op(log,*args):
@@ -21,7 +21,7 @@ def clean_Op(log,*args):
             db = DBConnector()
             vids = db.readCollaction("videos")
             for v in vids:
-                if ivaluaetFanction(v['avgRating'],v['ratedNum'],args):
+                if ivaluaetFanction(v['avgRating'],v['ratedNum'],, args[0].get(), args[1].get()):
                     db.deleteDoc(v)
         '''
 
@@ -35,7 +35,7 @@ def runSearchAndUpload(log):
     log.set("start search and upload data")
     settings = DBConnector().readCollaction("settings")
     TaskFactory(settings).startWork()
-    pass
+
 
 
 def upLoapFromBackUp(log):
@@ -62,7 +62,7 @@ log.set("log messages here")
 
 numOfRateds = IntVar()
 rating = IntVar()
-
+rating.set(1)
 cleanOp = lambda : clean_Op(log,numOfRateds,rating)
 S_U_Op = lambda : runSearchAndUpload(log)
 uploadFromBackUpFileOp = lambda : upLoapFromBackUp(log)

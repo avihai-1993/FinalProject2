@@ -1,8 +1,8 @@
 #crawler demonstration
 from pytube import *
 from util.Craweler import Crawler
-inputSt = "dog"
-depth = 2
+inputSt = "Physical therapy exercises for Lumbar"
+depth = 3
 t = set()
 c = Crawler()
 starturl = c.getGoogleVidYTUrl(inputSt)
