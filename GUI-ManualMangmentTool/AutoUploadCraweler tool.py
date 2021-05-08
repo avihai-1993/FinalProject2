@@ -21,7 +21,7 @@ def clean_Op(log,*args):
             db = DBConnector()
             vids = db.readCollaction("videos")
             for v in vids:
-                if ivaluaetFanction(v['rating'],v['views'],args):
+                if ivaluaetFanction(v['avgRating'],v['ratedNum'],args):
                     db.deleteDoc(v)
         '''
 
