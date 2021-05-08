@@ -6,7 +6,7 @@ def strOnlydigAndAlpha(s):
     if type(s) is not str:
         return False
     for i in range(len(s)):
-        if not s[i].isdigit() and not s[i].isalpha():
+        if not s[i].isdigit() and not s[i].isalpha() and not s[i].isspace():
             return False
 
     return True

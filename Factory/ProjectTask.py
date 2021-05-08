@@ -13,22 +13,28 @@ class Task:
 
 
     def start(self,depth,startURL=None):
-         if startURL is None or startURL == '':
+
+        print(int(depth))
+        print(startURL)
+        print(self.searchWord)
+
+        if startURL is None or startURL == '':
               starturl = self.c.getGoogleVidYTUrl(self.searchWord)
-              self.c.crawel(starturl, depth, self.keys)
-         else:
-              self.c.crawel(startURL, depth, self.keys)
+              self.c.crawel(int(depth),starturl, self.keys)
+        else:
+              self.c.crawel(int(depth),startURL, self.keys)
 
-         save_dict_to_setting = {
+        save_dict_to_setting = {
              'lastTaskUrl': self.c.nexturl
-         }
-         self.fsdb.uploadDataToDoc("settings/"+self.type+"/keywords/"+self.searchWord,save_dict_to_setting)
+        }
+        self.fsdb.uploadDataToDoc("settings/"+self.type+"/keywords/"+self.searchWord,save_dict_to_setting)
 
-         for key in self.keys:
+        for key in self.keys:
+             print(key)
              upload_via_key_strem(key,self.type)
 
-
-
+            
+       
 
 
 

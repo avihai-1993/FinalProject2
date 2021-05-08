@@ -49,7 +49,7 @@ def getTypeVideosList():
 
 def commitSettingButtonFunction(typeToAddOrChange, keywordListInEntry, typeComboBox1, typeComboBox2,logView):
     db = DBConnector()
-    if typeToAddOrChange is None or typeToAddOrChange=='':
+    if typeToAddOrChange is None or typeToAddOrChange==''  or typeToAddOrChange.isspace():
         logView.set("cant add or change type ")
         return
 
