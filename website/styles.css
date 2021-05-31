@@ -1,0 +1,10 @@
+body{
+    background-color: rgba(116, 118, 119, 0.116);
+    
+}
+
+td{
+    border:1px solid burlywood;
+    height: fit-content;
+
+}

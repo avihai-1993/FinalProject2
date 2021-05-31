@@ -16,14 +16,14 @@ def ivaluaetFanction(rating,views,*args):
 def clean_Op(log,*args):
     log.set("start cleaning the DB")
     try:
-        print(ivaluaetFanction(2, 15, args[0].get(), args[1].get()))
-        '''
-            db = DBConnector()
-            vids = db.readCollaction("videos")
-            for v in vids:
-                if ivaluaetFanction(v['avgRating'],v['ratedNum'],, args[0].get(), args[1].get()):
+        ##print(ivaluaetFanction(2, 15, args[0].get(), args[1].get()))
+
+        db = DBConnector()
+        vids = db.readCollaction("videos")
+        for v in vids:
+            if ivaluaetFanction(v['avgRating'],v['ratedNum'], args[0].get(), args[1].get()):
                     db.deleteDoc(v)
-        '''
+
 
     except Exception as e:
         log.set(e.__str__())

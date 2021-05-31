@@ -6,6 +6,7 @@ from util.ProjectFunctionsMoudle import upload_via_key_strem
 from util.ProjectFunctionsMoudle import strOnlydigAndAlpha
 import sys
 import os
+import webbrowser
 
 
 def makeCustomFormatString(arr):

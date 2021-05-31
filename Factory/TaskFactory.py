@@ -2,7 +2,7 @@ from Factory.ProjectTask import Task
 from util.DBconnector import DBConnector
 from threading import Thread
 
-DEPTH = 6
+DEPTH = 2
 
 
 class TaskFactory:
