@@ -4,9 +4,9 @@ from util.DBconnector import DBConnector
 import threading
 from util.ProjectFunctionsMoudle import upload_via_key_strem
 from util.ProjectFunctionsMoudle import strOnlydigAndAlpha
-import sys
 import os
 import webbrowser
+import functools
 
 
 def makeCustomFormatString(arr):
@@ -45,6 +45,15 @@ def getTypeVideosList():
         return []
 
 
+def openMonitor():
+    path = os.path.abspath(__file__).split('\\')
+    arr = []
+    for i in range(len(path) - 1):
+        arr.append(path[i])
+    s = functools.reduce(lambda a, b: a + b + "\\", arr, "")
+    s+="website\monitor.html"
+    print(s)
+    webbrowser.open(s,new=1)
 
 
 
@@ -187,6 +196,10 @@ uploadButton = tk.Button(mainWindow,text= "upload",command=f)
 commitSettingButton = tk.Button(mainWindow,text= "commit to batch job setting",command=f1)
 deleteTypeInSettingsButton = tk.Button(mainWindow,text= "delete selected type",command=f2)
 
+
+
+monitorButton = tk.Button(mainWindow,text= "open report",command=openMonitor)
+
 in_side_spaceingX = 6
 in_side_spaceingY = 6
 out_side_spaceingX = 9
@@ -210,5 +223,5 @@ edit_key_words_Entry.grid(row = 5 ,column = 0,ipadx= in_side_spaceingX ,ipady = 
 commitSettingButton.grid(row = 5 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 
 deleteTypeInSettingsButton.grid(row = 6 ,column = 1,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
-
+monitorButton.grid(row = 7 ,column = 0,ipadx= in_side_spaceingX ,ipady = in_side_spaceingY,padx =out_side_spaceingX,pady =out_side_spaceingY)
 mainWindow.mainloop()
