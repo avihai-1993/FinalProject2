@@ -8,24 +8,22 @@ from threading import Thread
 
 
 def ivaluaetFanction(rating,views,*args):
-    print(args[0],args[1])
-    print(rating,views)
-    return rating >= args[1] and views <= args[0]
+
+    return rating <= int(args[1]) and views >= int(args[0])
 
 
 def clean_Op(log,*args):
     log.set("start cleaning the DB")
     try:
-        ##print(ivaluaetFanction(2, 15, args[0].get(), args[1].get()))
-
         db = DBConnector()
         vids = db.readCollaction("videos")
         for v in vids:
-            if ivaluaetFanction(v['avgRating'],v['ratedNum'], args[0].get(), args[1].get()):
-                    db.deleteDoc(v)
+            if ivaluaetFanction(vids[v]['avgRating'],vids[v]['ratedNum'], args[0].get(), args[1].get()):
+                    db.deleteDoc("videos/"+v)
 
 
     except Exception as e:
+        print(e)
         log.set(e.__str__())
         return
 
@@ -40,11 +38,12 @@ def runSearchAndUpload(log):
 
 def upLoapFromBackUp(log):
     try:
-        log.set("upload all from backup")
+
         b = BackUp()
         keys = b.getAllkeys()
+        log.set("upload all from backup "+str(len(keys)))
         for k in keys:
-            Thread(target=upload_via_key_strem, args=[k['key'], k['type'], False]).start()
+            Thread(target=upload_via_key_strem, args=[keys[k]['key'], keys[k]['type'], False]).start()
     except Exception as e:
         log.set(e.__str__())
         return
@@ -73,7 +72,7 @@ numOfRatedsLable = tk.Label(mainWindow, text ="number Of users that raited  : ")
 numOfRatedsEntry = tk.Entry(mainWindow,width = 50,textvariable= numOfRateds)
 
 ratingLable = tk.Label(mainWindow, text ="rating max limit : ")
-ratingCombobox = ttk.Combobox(mainWindow,width = 50,values = [1,2,3,4,5],textvariable=rating,state="readonly")
+ratingCombobox = ttk.Combobox(mainWindow,width = 50,values = [0,1,2,3,4,5],textvariable=rating,state="readonly")
 
 cleandb = tk.Button(mainWindow, text="clean DB" , command=cleanOp)
 
